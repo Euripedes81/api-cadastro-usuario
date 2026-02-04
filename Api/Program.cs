@@ -56,7 +56,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 var result = JsonSerializer.Serialize(new ErrorResponse<StatusCodeResponse>(
                     FactoryStatusCodeResponse.Create(
                         message: "Token inválido ou expirado.",
-                        status: StatusCodes.Status401Unauthorized
+                        code: StatusCodes.Status401Unauthorized
                     ))
                 );
 

@@ -7,7 +7,7 @@ namespace Application.Common.Responses
         [JsonPropertyName("message")]
         public string? Message { get; set; }
 
-        [JsonPropertyName("status")]
+        [JsonPropertyName("code")]
         public int Code { get; set; }      
     }
 }

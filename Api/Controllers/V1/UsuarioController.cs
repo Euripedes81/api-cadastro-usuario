@@ -44,7 +44,7 @@ namespace Api.Controllers.V1
                     new ErrorResponse<StatusCodeResponse>(
                             FactoryStatusCodeResponse.Create(
                                 message: usuario.Mensagem,
-                                status: usuario.Code
+                                code: usuario.Code
                         )));
             }
 
@@ -72,7 +72,7 @@ namespace Api.Controllers.V1
                     new ErrorResponse<StatusCodeResponse>(
                             FactoryStatusCodeResponse.Create(
                                 message: usuarios.ToList()[0].Mensagem,
-                                status: usuarios.ToList()[0].Code
+                                code: usuarios.ToList()[0].Code
                         )));
             }
 
@@ -103,7 +103,7 @@ namespace Api.Controllers.V1
                     new ErrorResponse<StatusCodeResponse>(
                             FactoryStatusCodeResponse.Create(
                                 message: usuario.Mensagem,
-                                status: usuario.Code
+                                code: usuario.Code
                         )));
             }
 
@@ -135,7 +135,7 @@ namespace Api.Controllers.V1
                     new ErrorResponse<StatusCodeResponse>(
                             FactoryStatusCodeResponse.Create(
                                 message: usuario.Mensagem,
-                                status: usuario.Code
+                                code: usuario.Code
                         )));
             }
 
@@ -166,7 +166,7 @@ namespace Api.Controllers.V1
                     new ErrorResponse<StatusCodeResponse>(
                             FactoryStatusCodeResponse.Create(
                                 message: atualizado.Mensagem,
-                                status: atualizado.Code
+                                code: atualizado.Code
                         )));
             }
 

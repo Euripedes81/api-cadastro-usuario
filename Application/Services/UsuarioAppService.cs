@@ -4,6 +4,7 @@ using Application.Interfaces.IRepository;
 using Application.Interfaces.IServices;
 using Domain.Entities;
 using Application.Common.Enuns;
+using Application.Common.Responses;
 
 namespace Application.Services
 {
@@ -124,18 +125,27 @@ namespace Application.Services
                     Email = usuarioCriado.Email,
                     Perfil = new PerfilUsuarioResponseDTO
                     {
-                        Id = usuario.PerfilUsuario!.Id,   
-                        Nome = usuario.PerfilUsuario.Nome
+                        Id = usuarioCriado.PerfilUsuario!.Id,   
+                        Nome = usuarioCriado.PerfilUsuario.Nome
                     }
                 };
+
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                string mensagemException = StatusCodeMessage.InternalServerError.ToString();
+                int code = (int)StatusCodeMessage.InternalServerError;
+
+                if (ex.InnerException!.Message.ToString().Contains("IX_Usuario_Email"))
+                {
+                    code = (int)StatusCodeMessage.Conflict;
+                    mensagemException = $"{StatusCodeMessage.Conflict}: {StatusMessageResponse.EmailJaExiste}";
+                }
 
                 return new UsuarioResponseDTO
                 {
-                    Code = (int)StatusCodeMessage.InternalServerError,
-                    Mensagem = StatusCodeMessage.InternalServerError.ToString()
+                    Code = code,
+                    Mensagem = mensagemException
                 };
             }
         }
