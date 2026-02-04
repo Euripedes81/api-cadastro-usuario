@@ -15,8 +15,8 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApplication();      // registra camada de aplica��o
-builder.Services.AddInfrastructure(builder.Configuration); // registra infraestrutura
+builder.Services.AddApplication();   
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var jwtConfig = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtConfig["Key"]!);
@@ -104,14 +104,7 @@ builder.Services.AddSwaggerGen(c =>
         Title = "API Cadastro de Usuários",
         Version = "v1",
         Description = "API para gerenciamento de Cadastro de Usuários",
-    });
-
-    //c.SwaggerDoc("v2", new OpenApiInfo
-    //{
-    //    Title = "API Cadastro de Usuários",
-    //    Version = "v2",
-    //    Description = "API para gerenciamento de Cadastro de Usuários",
-    //});
+    });    
 
     if (!builder.Environment.IsDevelopment())
     {
@@ -173,18 +166,18 @@ var app = builder.Build();
 var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 
 // Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-app.UseSwagger();
-app.UseSwaggerUI(options =>
+if (app.Environment.IsDevelopment())
 {
-    foreach (var desc in provider.ApiVersionDescriptions)
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint($"{desc.GroupName}/swagger.json", $"Cadastro {desc.GroupName.ToUpper()}");
-        options.RoutePrefix = "swagger";
-    }
-});
-//}
+        foreach (var desc in provider.ApiVersionDescriptions)
+        {
+            options.SwaggerEndpoint($"{desc.GroupName}/swagger.json", $"Cadastro {desc.GroupName.ToUpper()}");
+            options.RoutePrefix = "swagger";
+        }
+    });
+}
 
 app.UseHttpsRedirection();
 

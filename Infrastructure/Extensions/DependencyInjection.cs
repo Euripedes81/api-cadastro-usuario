@@ -1,6 +1,5 @@
 ﻿using Application.Interfaces.IRepository;
 using Application.Interfaces.IServices;
-using Domain.Entities;
 using Infraestruture.Security;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
