@@ -5,6 +5,7 @@ using Application.DTO.Responses;
 using Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers.V1
 {
@@ -14,12 +15,13 @@ namespace Api.Controllers.V1
     [Route("v{version:apiVersion}/usuarios")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public class UsuarioController : ControllerBase
     {
-        private readonly IUsuarioAppService _service;
-        public UsuarioController(IUsuarioAppService service)
+        private readonly IUsuarioAppService _usuarioService;
+        public UsuarioController(IUsuarioAppService usuarioService)
         {
-            _service = service;
+            _usuarioService = usuarioService;
         }
 
         /// <summary>
@@ -29,32 +31,40 @@ namespace Api.Controllers.V1
         /// <response code="200">Ok</response> 
         /// <returns>Retorna um usuario.</returns>
         /// <remarks>Obtémum usuario.</remarks>
-        [HttpGet("{id}")]
+        [HttpGet("{id}")]       
         [ProducesResponseType(typeof(SuccessResponse<UsuarioResponseDTO>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetId([FromRoute] int id)
         {
-            var result = await _service.ObterPorIdAsync(id);
-
-            if (!result.IsSuccess)
+            if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == id.ToString())
             {
-                return result.ErrorCode switch
-                {
-                    ApplicationErrors.UsuarioNaoEncontrado =>
-                        NotFound(new ErrorResponse(
-                            MessageResponse.UsuarioNaoEncontrado,
-                            result.ErrorCode
-                        )),
+                var result = await _usuarioService.ObterPorIdAsync(id);
 
-                    _ =>
-                        StatusCode(
-                            StatusCodes.Status500InternalServerError,
-                            new ErrorResponse("Erro interno no servidor")
-                        )
-                };
+                if (!result.IsSuccess)
+                {
+                    return result.ErrorCode switch
+                    {
+                        ApplicationErrors.UsuarioNaoEncontrado =>
+                            NotFound(new ErrorResponse(
+                                MessageResponse.UsuarioNaoEncontrado,
+                                result.ErrorCode
+                            )),
+
+                        _ =>
+                            StatusCode(
+                                StatusCodes.Status500InternalServerError,
+                                new ErrorResponse("Erro interno no servidor")
+                            )
+                    };
+                }
+
+                return Ok(new SuccessResponse<UsuarioResponseDTO>(result.Data!));
             }
 
-            return Ok(new SuccessResponse<UsuarioResponseDTO>(result.Data!));
+            return StatusCode(
+                      StatusCodes.Status403Forbidden,
+                      new ErrorResponse("Acesso negado!", "403")
+                 );
         }
 
         /// <summary>
@@ -64,32 +74,38 @@ namespace Api.Controllers.V1
         /// <returns>Retorna usuários.</returns>
         /// <remarks>Obtém usuários.</remarks>
         [HttpGet]
+        [Authorize(Roles = "Administrador")]
         [ProducesResponseType(typeof(SuccessResponseList<UsuarioResponseDTO>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]        
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get()
         {
-            var result = await _service.ObterTodosAsync();
+          
 
-            if (!result.IsSuccess)
-            {
-                return result.ErrorCode switch
+                var result = await _usuarioService.ObterTodosAsync();
+
+                if (!result.IsSuccess)
                 {
-                    ApplicationErrors.UsuarioNaoEncontrado =>
-                        NotFound(new ErrorResponse(
-                            MessageResponse.UsuarioNaoEncontrado,
-                            result.ErrorCode
-                        )),
+                    return result.ErrorCode switch
+                    {
+                        ApplicationErrors.UsuarioNaoEncontrado =>
+                            NotFound(new ErrorResponse(
+                                MessageResponse.UsuarioNaoEncontrado,
+                                result.ErrorCode
+                            )),
 
-                    _ =>
-                        StatusCode(
-                            StatusCodes.Status500InternalServerError,
-                            new ErrorResponse("Erro interno no servidor")
-                        )
-                };
-            }
+                        _ =>
+                            StatusCode(
+                                StatusCodes.Status500InternalServerError,
+                                new ErrorResponse("Erro interno no servidor")
+                            )
+                    };
+                }
 
-            return Ok(new SuccessResponseList<UsuarioResponseDTO>(result.Data!.ToList()));
+                return Ok(new SuccessResponseList<UsuarioResponseDTO>(result.Data!.ToList()));
+            
+
+          
         }
 
         /// <summary>
@@ -107,7 +123,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PostLogin([FromBody] LoginDTO loginCreateDTO)
         {
-            var result = await _service.FazerLoginAsync(loginCreateDTO);
+            var result = await _usuarioService.FazerLoginAsync(loginCreateDTO);
 
             if (result.IsSuccess)
             {
@@ -144,17 +160,15 @@ namespace Api.Controllers.V1
         /// <response code="401">Unauthorized</response>
         /// <returns>Cria um usuario.</returns>       
         [HttpPost]
-        [AllowAnonymous]
+        [Authorize(Roles = "Administrador")]
         [ProducesResponseType(typeof(SuccessResponse<UsuarioResponseDTO>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ErrorResponse  ), StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-
-        [HttpPost]
         public async Task<IActionResult> Post([FromBody] UsuarioDTO usuarioCreateDTO)
         {
-            var result = await _service.AdicionarAsync(usuarioCreateDTO);
+            var result = await _usuarioService.AdicionarAsync(usuarioCreateDTO);
          
             if (result.IsSuccess)
             {
@@ -190,6 +204,7 @@ namespace Api.Controllers.V1
         /// <response code="401">Unauthorized</response>
         /// <returns>Atualiza um usuario.</returns>        
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")]
         [ProducesResponseType(typeof(SuccessResponse<GenericResponseDTO>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
@@ -197,7 +212,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] UsuarioDTO usuarioUpdateDTO)
         {
-            var result = await _service.AtualizarAsync(id, usuarioUpdateDTO);
+            var result = await _usuarioService.AtualizarAsync(id, usuarioUpdateDTO);
 
             if (result.IsSuccess)
             {

@@ -3,8 +3,7 @@
 namespace Api.Responses
 {
     public class SuccessResponseList<T>
-    {
-        [JsonPropertyName("data")]
+    {      
         public List<T> Data { get; set; }
 
         public SuccessResponseList(List<T> data)
