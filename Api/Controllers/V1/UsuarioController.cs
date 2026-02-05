@@ -127,19 +127,19 @@ namespace Api.Controllers.V1
 
         public async Task<IActionResult> Post([FromBody] UsuarioDTO usuarioCreateDTO)
         {
-            var usuario = await _service.AdicionarAsync(usuarioCreateDTO);
-            if (!string.IsNullOrEmpty(usuario.Mensagem))
+            var criado = await _service.AdicionarAsync(usuarioCreateDTO);
+            if (!string.IsNullOrEmpty(criado.Mensagem))
             {
                 return StatusCode(
-                    usuario.Code,
+                    criado.Code,
                     new ErrorResponse<StatusCodeResponse>(
                             FactoryStatusCodeResponse.Create(
-                                message: usuario.Mensagem,
-                                code: usuario.Code
+                                message: criado.Mensagem,
+                                code: criado.Code
                         )));
             }
 
-            return Ok(new SuccessResponse<UsuarioResponseDTO>(usuario));
+            return Ok(new SuccessResponse<GenericResponseDTO>(criado, StatusCodeMessage.Ok.ToString()));
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace Api.Controllers.V1
         /// <response code="401">Unauthorized</response>
         /// <returns>Atualiza um usuario.</returns>        
         [HttpPut("{id}")]       
-        [ProducesResponseType(typeof(SuccessResponse<AtualizadoDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SuccessResponse<GenericResponseDTO>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse<StatusCodeResponse>), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorResponse<StatusCodeResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ErrorResponse<StatusCodeResponse>), StatusCodes.Status500InternalServerError)]
@@ -170,7 +170,7 @@ namespace Api.Controllers.V1
                         )));
             }
 
-            return Ok(new SuccessResponse<AtualizadoDTO>(atualizado, StatusCodeMessage.Ok.ToString()));
+            return Ok(new SuccessResponse<GenericResponseDTO>(atualizado, StatusCodeMessage.Ok.ToString()));
         }
     }
 }

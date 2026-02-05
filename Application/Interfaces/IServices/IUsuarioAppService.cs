@@ -7,7 +7,7 @@ namespace Application.Interfaces.IServices
     public interface IUsuarioAppService : IReaderAppService<UsuarioResponseDTO>, IDeleterAppService
     {
         Task<LoginResponseDTO> FazerLoginAsync(LoginDTO loginDTO);
-        Task<AtualizadoDTO> AtualizarAsync(int id, UsuarioDTO usuarioDTO);
-        Task<UsuarioResponseDTO> AdicionarAsync(UsuarioDTO usuarioDTO);
+        Task<GenericResponseDTO> AtualizarAsync(int id, UsuarioDTO usuarioDTO);
+        Task<GenericResponseDTO> AdicionarAsync(UsuarioDTO usuarioDTO);
     }
 }

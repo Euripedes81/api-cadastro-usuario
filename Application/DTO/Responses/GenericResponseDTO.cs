@@ -1,6 +1,6 @@
 ﻿namespace Application.DTO.Responses
 {
-    public record AtualizadoDTO : ErrorMessageDTO
+    public record GenericResponseDTO : ErrorMessageDTO
     {
         public int Id { get; init; }       
     }

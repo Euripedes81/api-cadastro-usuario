@@ -37,29 +37,50 @@ namespace Application.Services
             return usuario.MapToResponseDTO();
         }
 
-        public async Task<AtualizadoDTO> AtualizarAsync(int id, UsuarioDTO usuarioDTO)
+        public async Task<GenericResponseDTO> AtualizarAsync(int id, UsuarioDTO usuarioDTO)
         {
             var usuario = usuarioDTO.MapToEntity();
+            usuario.Id = id;
 
-            if (!await _usuarioRepository.AtualizarAsync(usuario))
+            try
             {
-                return new AtualizadoDTO
+                if (!await _usuarioRepository.AtualizarAsync(usuario))
                 {
-                    Code = (int)StatusCodeMessage.NotFound,
-                    Mensagem = StatusCodeMessage.NotFound.ToString()
+                    return new GenericResponseDTO
+                    {
+                        Code = (int)StatusCodeMessage.NotFound,
+                        Mensagem = StatusCodeMessage.NotFound.ToString()
+                    };
+                }
+
+                if (usuario.Id == 1)
+                {
+                    usuario.PerfilUsuarioId = 1;
+                    usuario.Inativo = false;
+                }
+
+                return new GenericResponseDTO
+                {
+                    Id = usuario!.Id
                 };
             }
+            catch (Exception ex)
+            {
+                string mensagemException = StatusCodeMessage.InternalServerError.ToString();
+                int code = (int)StatusCodeMessage.InternalServerError;
 
-            if (usuario.Id == 1)
-            {
-                usuario.PerfilUsuarioId = 1;
-                usuario.Inativo = false;
-            }     
-           
-            return new AtualizadoDTO
-            {
-                Id = usuario!.Id               
-            };
+                if (ex.InnerException!.Message.ToString().Contains("IX_Usuario_Email"))
+                {
+                    code = (int)StatusCodeMessage.Conflict;
+                    mensagemException = $"{StatusCodeMessage.Conflict}: {StatusMessageResponse.EmailJaExiste}";
+                }
+
+                return new GenericResponseDTO
+                {
+                    Code = code,
+                    Mensagem = mensagemException
+                };
+            }
         }
 
         public async Task RemoverAsync(int id)
@@ -78,7 +99,7 @@ namespace Application.Services
             return usuarios.Select(u => u.MapToResponseDTO()).ToList();
         }
 
-        public async Task<UsuarioResponseDTO> AdicionarAsync(UsuarioDTO usuarioDTO)
+        public async Task<GenericResponseDTO> AdicionarAsync(UsuarioDTO usuarioDTO)
         {
             Usuario usuario = usuarioDTO.MapToEntity();
 
@@ -87,7 +108,7 @@ namespace Application.Services
                 await _usuarioRepository.AdicionarAsync(usuario);
                 var usuarioCriado = await _usuarioRepository.ObterPorIdAsync(usuario.Id);
 
-                return usuarioCriado!.MapToResponseDTO();
+                return new GenericResponseDTO { Id = usuarioCriado!.Id };
             }
             catch (Exception ex)
             {
@@ -100,7 +121,7 @@ namespace Application.Services
                     mensagemException = $"{StatusCodeMessage.Conflict}: {StatusMessageResponse.EmailJaExiste}";
                 }
 
-                return new UsuarioResponseDTO
+                return new GenericResponseDTO
                 {
                     Code = code,
                     Mensagem = mensagemException

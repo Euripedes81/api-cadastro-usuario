@@ -17,7 +17,9 @@ namespace Application.Extensions
                 {
                     Id = usuario.PerfilUsuarioId,
                     Nome = usuario.PerfilUsuario!.Nome
-                }
+                },
+                Inativo = usuario.Inativo
+
             };
         }
 
@@ -28,7 +30,8 @@ namespace Application.Extensions
                 Nome = usuarioDTO.Nome,
                 Email = usuarioDTO.Email,
                 Senha = usuarioDTO.Senha,
-                PerfilUsuarioId = usuarioDTO.Perfil!.Id
+                PerfilUsuarioId = usuarioDTO.Perfil!.Id,
+                Inativo = usuarioDTO.Inativo
             };
         }
     }

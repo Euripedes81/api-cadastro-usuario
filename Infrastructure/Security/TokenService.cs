@@ -40,7 +40,7 @@ namespace Infraestruture.Security
                 issuer: _issuer,
                 audience: _audience,
                 claims: claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.Now.AddDays(7),
                 signingCredentials: credentials
             );
 
