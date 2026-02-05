@@ -1,6 +1,6 @@
-﻿namespace Application.Common.Responses
+﻿namespace Application.Messages
 {
-    public static class StatusMessageResponse
+    public static class MessageResponse
     {
         public const string Ok = "Ok";
         public const string UsuarioNaoEncontrado = "Usuário não encontrado.";

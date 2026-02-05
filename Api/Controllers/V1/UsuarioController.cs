@@ -1,11 +1,9 @@
 using Application.DTO.Responses;
 using Application.DTO.Create;
-using Application.Factories;
 using Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Application.Common.Responses;
-using Application.Common.Enuns;
+using Application.Messages;
 
 namespace Api.Controllers.V1
 {
@@ -42,11 +40,11 @@ namespace Api.Controllers.V1
                 return StatusCode(
                     usuario.Code,
                     new ErrorResponse<StatusCodeResponse>(
-                            FactoryStatusCodeResponse.Create(
+                            StatusCodeResponseCreator.Create(
                                 message: usuario.Mensagem,
                                 code: usuario.Code
                         )));
-            }
+            }        
 
             return Ok(new SuccessResponse<UsuarioResponseDTO>(usuario!));
         }
@@ -70,7 +68,7 @@ namespace Api.Controllers.V1
                 return StatusCode(
                     usuarios.ToList()[0].Code,
                     new ErrorResponse<StatusCodeResponse>(
-                            FactoryStatusCodeResponse.Create(
+                            StatusCodeResponseCreator.Create(
                                 message: usuarios.ToList()[0].Mensagem,
                                 code: usuarios.ToList()[0].Code
                         )));
@@ -101,7 +99,7 @@ namespace Api.Controllers.V1
                 return StatusCode(
                     usuario.Code,
                     new ErrorResponse<StatusCodeResponse>(
-                            FactoryStatusCodeResponse.Create(
+                            StatusCodeResponseCreator.Create(
                                 message: usuario.Mensagem,
                                 code: usuario.Code
                         )));
@@ -127,19 +125,19 @@ namespace Api.Controllers.V1
 
         public async Task<IActionResult> Post([FromBody] UsuarioDTO usuarioCreateDTO)
         {
-            var criado = await _service.AdicionarAsync(usuarioCreateDTO);
-            if (!string.IsNullOrEmpty(criado.Mensagem))
+            var usuario = await _service.AdicionarAsync(usuarioCreateDTO);
+            if (!string.IsNullOrEmpty(usuario.Mensagem))
             {
                 return StatusCode(
-                    criado.Code,
+                    usuario.Code,
                     new ErrorResponse<StatusCodeResponse>(
-                            FactoryStatusCodeResponse.Create(
-                                message: criado.Mensagem,
-                                code: criado.Code
+                            StatusCodeResponseCreator.Create(
+                                message: usuario.Mensagem,
+                                code: usuario.Code
                         )));
             }
 
-            return Ok(new SuccessResponse<GenericResponseDTO>(criado, StatusCodeMessage.Ok.ToString()));
+            return base.Ok(new SuccessResponse<GenericResponseDTO>(usuario, System.Net.HttpStatusCode.Created.ToString()));
         }
 
         /// <summary>
@@ -164,13 +162,13 @@ namespace Api.Controllers.V1
                 return StatusCode(
                     atualizado.Code,
                     new ErrorResponse<StatusCodeResponse>(
-                            FactoryStatusCodeResponse.Create(
+                            StatusCodeResponseCreator.Create(
                                 message: atualizado.Mensagem,
                                 code: atualizado.Code
                         )));
             }
 
-            return Ok(new SuccessResponse<GenericResponseDTO>(atualizado, StatusCodeMessage.Ok.ToString()));
+            return base.Ok(new SuccessResponse<GenericResponseDTO>(atualizado, System.Net.HttpStatusCode.OK.ToString()));
         }
     }
 }

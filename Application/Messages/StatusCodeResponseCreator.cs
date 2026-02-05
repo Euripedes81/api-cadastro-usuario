@@ -1,8 +1,6 @@
-﻿using Application.Common.Responses;
-
-namespace Application.Factories
+﻿namespace Application.Messages
 {
-    public class FactoryStatusCodeResponse
+    public class StatusCodeResponseCreator
     {
         public static StatusCodeResponse Create(string message = "", int code = 0)
         {

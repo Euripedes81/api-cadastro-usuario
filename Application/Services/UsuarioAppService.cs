@@ -3,9 +3,9 @@ using Application.DTO.Create;
 using Application.Interfaces.IRepository;
 using Application.Interfaces.IServices;
 using Domain.Entities;
-using Application.Common.Enuns;
-using Application.Common.Responses;
 using Application.Extensions;
+using System.Net;
+using Application.Messages;
 
 namespace Application.Services
 {
@@ -29,8 +29,8 @@ namespace Application.Services
             {
                 return new UsuarioResponseDTO
                 {
-                    Code = (int)StatusCodeMessage.NotFound,
-                    Mensagem = StatusCodeMessage.NotFound.ToString()
+                    Code = (int)HttpStatusCode.NotFound,
+                    Mensagem = HttpStatusCode.NotFound.ToString()
                 };
             }
 
@@ -48,8 +48,8 @@ namespace Application.Services
                 {
                     return new GenericResponseDTO
                     {
-                        Code = (int)StatusCodeMessage.NotFound,
-                        Mensagem = StatusCodeMessage.NotFound.ToString()
+                        Code = (int)HttpStatusCode.NotFound,
+                        Mensagem = HttpStatusCode.NotFound.ToString()
                     };
                 }
 
@@ -66,13 +66,13 @@ namespace Application.Services
             }
             catch (Exception ex)
             {
-                string mensagemException = StatusCodeMessage.InternalServerError.ToString();
-                int code = (int)StatusCodeMessage.InternalServerError;
+                string mensagemException = HttpStatusCode.InternalServerError.ToString();
+                int code = (int)HttpStatusCode.InternalServerError;
 
                 if (ex.InnerException!.Message.ToString().Contains("IX_Usuario_Email"))
                 {
-                    code = (int)StatusCodeMessage.Conflict;
-                    mensagemException = $"{StatusCodeMessage.Conflict}: {StatusMessageResponse.EmailJaExiste}";
+                    code = (int)HttpStatusCode.Conflict;
+                    mensagemException = $"{HttpStatusCode.Conflict}: {MessageResponse.EmailJaExiste}";
                 }
 
                 return new GenericResponseDTO
@@ -112,13 +112,13 @@ namespace Application.Services
             }
             catch (Exception ex)
             {
-                string mensagemException = StatusCodeMessage.InternalServerError.ToString();
-                int code = (int)StatusCodeMessage.InternalServerError;
+                string mensagemException = HttpStatusCode.InternalServerError.ToString();
+                int code = (int)HttpStatusCode.InternalServerError;
 
                 if (ex.InnerException!.Message.ToString().Contains("IX_Usuario_Email"))
                 {
-                    code = (int)StatusCodeMessage.Conflict;
-                    mensagemException = $"{StatusCodeMessage.Conflict}: {StatusMessageResponse.EmailJaExiste}";
+                    code = (int)HttpStatusCode.Conflict;
+                    mensagemException = $"{HttpStatusCode.Conflict}: {MessageResponse.EmailJaExiste}";
                 }
 
                 return new GenericResponseDTO
@@ -152,8 +152,8 @@ namespace Application.Services
 
             return new LoginResponseDTO
             {
-                Mensagem = StatusCodeMessage.NotFound.ToString(),
-                Code = (int)StatusCodeMessage.NotFound
+                Mensagem = HttpStatusCode.NotFound.ToString(),
+                Code = (int)HttpStatusCode.NotFound
             };
 
         }
