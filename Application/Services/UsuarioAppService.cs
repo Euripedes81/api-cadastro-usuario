@@ -5,6 +5,7 @@ using Application.Interfaces.IServices;
 using Domain.Entities;
 using Application.Common.Enuns;
 using Application.Common.Responses;
+using Application.Extensions;
 
 namespace Application.Services
 {
@@ -33,27 +34,12 @@ namespace Application.Services
                 };
             }
 
-            return new UsuarioResponseDTO
-            {
-                Id = id,
-                Nome = usuario?.Nome,
-                Email = usuario?.Email,              
-                Perfil = new PerfilUsuarioResponseDTO { Id = usuario!.PerfilUsuario!.Id, Nome = usuario.PerfilUsuario.Nome },               
-                Inativo = usuario.Inativo
-            };
+            return usuario.MapToResponseDTO();
         }
 
         public async Task<AtualizadoDTO> AtualizarAsync(int id, UsuarioDTO usuarioDTO)
         {
-            var usuario = new Usuario
-            {
-                Id = id,
-                Nome = usuarioDTO!.Nome,
-                Email = usuarioDTO!.Email,
-                Senha = usuarioDTO!.Senha,
-                PerfilUsuarioId = usuarioDTO.Perfil!.Id,
-                Inativo = usuarioDTO.Inativo
-            };
+            var usuario = usuarioDTO.MapToEntity();
 
             if (!await _usuarioRepository.AtualizarAsync(usuario))
             {
@@ -89,47 +75,19 @@ namespace Application.Services
         public async Task<ICollection<UsuarioResponseDTO>> ObterTodosAsync()
         {
             var usuarios = await _usuarioRepository.ObterTodosAsync();
-            return usuarios.Select(u =>
-            new UsuarioResponseDTO
-            {
-                Id = u.Id,
-                Nome = u.Nome,
-                Email = u.Email,
-                Perfil = new PerfilUsuarioResponseDTO
-                {
-                    Id = u.PerfilUsuarioId,
-                    Nome = u.PerfilUsuario!.Nome
-                }
-            }).ToList();
+            return usuarios.Select(u => u.MapToResponseDTO()).ToList();
         }
 
         public async Task<UsuarioResponseDTO> AdicionarAsync(UsuarioDTO usuarioDTO)
         {
-            Usuario usuario = new Usuario
-            {
-                Nome = usuarioDTO.Nome,
-                Email = usuarioDTO.Email,
-                Senha = usuarioDTO.Senha,
-                PerfilUsuarioId = usuarioDTO.Perfil!.Id
-            };
+            Usuario usuario = usuarioDTO.MapToEntity();
 
             try
             {
                 await _usuarioRepository.AdicionarAsync(usuario);
                 var usuarioCriado = await _usuarioRepository.ObterPorIdAsync(usuario.Id);
 
-                return new UsuarioResponseDTO
-                {
-                    Id = usuarioCriado!.Id,
-                    Nome = usuarioCriado!.Nome,
-                    Email = usuarioCriado.Email,
-                    Perfil = new PerfilUsuarioResponseDTO
-                    {
-                        Id = usuarioCriado.PerfilUsuario!.Id,   
-                        Nome = usuarioCriado.PerfilUsuario.Nome
-                    }
-                };
-
+                return usuarioCriado!.MapToResponseDTO();
             }
             catch (Exception ex)
             {
@@ -150,12 +108,12 @@ namespace Application.Services
             }
         }
 
-        public async Task<LoginResponseDTO> FazerLoginAsync(LoginDTO usuarioDTO)
+        public async Task<LoginResponseDTO> FazerLoginAsync(LoginDTO loginDTO)
         {
             var usuario = await _usuarioRepository.FazerLogin(new Usuario
             {
-                Email = usuarioDTO.Email,
-                Senha = usuarioDTO.Senha
+                Email = loginDTO.Email,
+                Senha = loginDTO.Senha
             });
 
             if (usuario != null)
