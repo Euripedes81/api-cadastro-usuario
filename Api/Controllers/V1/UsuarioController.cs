@@ -63,27 +63,34 @@ namespace Api.Controllers.V1
         /// <response code="200">Ok</response> 
         /// <returns>Retorna usuários.</returns>
         /// <remarks>Obtém usuários.</remarks>
-        //[HttpGet]
-        //[ProducesResponseType(typeof(SuccessResponseList<UsuarioResponseDTO>), StatusCodes.Status200OK)]
-        //[ProducesResponseType(typeof(ErrorResponse<StatusCodeResponse>), StatusCodes.Status401Unauthorized)]
-        //[ProducesResponseType(typeof(ErrorResponse<StatusCodeResponse>), StatusCodes.Status404NotFound)]
-        //public async Task<IActionResult> Get()
-        //{
-        //    ICollection<UsuarioResponseDTO> usuarios = await _service.ObterTodosAsync();
+        [HttpGet]
+        [ProducesResponseType(typeof(SuccessResponseList<UsuarioResponseDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get()
+        {
+            var result = await _service.ObterTodosAsync();
 
-        //    if (!string.IsNullOrEmpty(usuarios.ToList()[0].Mensagem))
-        //    {
-        //        return StatusCode(
-        //            usuarios.ToList()[0].Code,
-        //            new ErrorResponse<StatusCodeResponse>(
-        //                    StatusCodeResponseCreator.Create(
-        //                        message: usuarios.ToList()[0].Mensagem,
-        //                        code: usuarios.ToList()[0].Code
-        //                )));
-        //    }
+            if (!result.IsSuccess)
+            {
+                return result.ErrorCode switch
+                {
+                    ApplicationErrors.UsuarioNaoEncontrado =>
+                        NotFound(new ErrorResponse(
+                            MessageResponse.UsuarioNaoEncontrado,
+                            result.ErrorCode
+                        )),
 
-        //    return Ok(new SuccessResponseList<UsuarioResponseDTO>(usuarios.ToList()));
-        //}
+                    _ =>
+                        StatusCode(
+                            StatusCodes.Status500InternalServerError,
+                            new ErrorResponse("Erro interno no servidor")
+                        )
+                };
+            }
+
+            return Ok(new SuccessResponseList<UsuarioResponseDTO>(result.Data!.ToList()));
+        }
 
         /// <summary>
         /// Cria um token para o usuário.
@@ -95,26 +102,39 @@ namespace Api.Controllers.V1
         /// <remarks>Cria um token quando o usuário é autenticado.</remarks>   
         [HttpPost("logins")]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(SuccessResponse<UsuarioResponseDTO>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorResponse<StatusCodeResponse>), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ErrorResponse<StatusCodeResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(LoginResponseDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PostLogin([FromBody] LoginDTO loginCreateDTO)
         {
             var result = await _service.FazerLoginAsync(loginCreateDTO);
-            if (!string.IsNullOrEmpty(result.Mensagem))
-            {
-                return StatusCode(
-                    result.Code,
-                    new ErrorResponse<StatusCodeResponse>(
-                            StatusCodeResponseCreator.Create(
-                                message: result.Mensagem,
-                                code: result.Code
-                        )));
-            }
 
-            return Ok(new SuccessResponse<LoginResponseDTO>(result));
+            if (result.IsSuccess)
+            {
+                return Ok(result.Data);
+            }
+           
+            return result.ErrorCode switch
+            {
+                ApplicationErrors.CredenciaisInvalidas =>
+                    Unauthorized(new ProblemDetails
+                    {
+                        Title = "Credenciais inválidas",
+                        Status = StatusCodes.Status401Unauthorized,
+                        Detail = "E-mail ou senha incorretos."
+                    }),
+
+                _ =>
+                    StatusCode(
+                        StatusCodes.Status500InternalServerError,
+                        new ProblemDetails
+                        {
+                            Title = "Erro interno",
+                            Status = StatusCodes.Status500InternalServerError
+                        })
+            };          
         }
+
 
         /// <summary>
         /// Cria um usuário.

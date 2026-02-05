@@ -5,7 +5,7 @@ namespace Application.Interfaces.IServices.Generics
 {
     public interface IReaderAppService<T> where T : class
     {
-        Task<ICollection<T>> ObterTodosAsync();
+        Task<ApplicationResult<ICollection<UsuarioResponseDTO>>> ObterTodosAsync();
         Task<ApplicationResult<T>> ObterPorIdAsync(int id);
     }
 }

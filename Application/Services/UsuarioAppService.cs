@@ -9,14 +9,14 @@ using System.Net;
 namespace Application.Services
 {
     public class UsuarioAppService : IUsuarioAppService
-    {       
-        private readonly IPerfilUsuarioRepository _perfilUsuarioRepository;      
+    {
+        private readonly IPerfilUsuarioRepository _perfilUsuarioRepository;
         public readonly ITokenService _tokenService;
         public readonly IUsuarioRepository _usuarioRepository;
         public UsuarioAppService(IUsuarioRepository usuarioRepository, IPerfilUsuarioRepository perfilUsuarioRepository, ITokenService tokenService)
         {
             _usuarioRepository = usuarioRepository;
-            _perfilUsuarioRepository = perfilUsuarioRepository;          
+            _perfilUsuarioRepository = perfilUsuarioRepository;
             _tokenService = tokenService;
         }
 
@@ -72,17 +72,25 @@ namespace Application.Services
         public async Task RemoverAsync(int id)
         {
             var usuario = _usuarioRepository.ObterPorIdAsync(id);
-           
+
             if (usuario?.Id > 1)
             {
                 await _usuarioRepository.RemoverAsync(id);
-            }           
-        }  
+            }
+        }
 
-        public async Task<ICollection<UsuarioResponseDTO>> ObterTodosAsync()
+        public async Task<ApplicationResult<ICollection<UsuarioResponseDTO>>> ObterTodosAsync()
         {
             var usuarios = await _usuarioRepository.ObterTodosAsync();
-            return usuarios.Select(u => u.MapToResponseDTO()).ToList();
+           
+            if (usuarios == null)
+            {
+                return ApplicationResult<ICollection<UsuarioResponseDTO>>
+                    .Failure(ApplicationErrors.UsuarioNaoEncontrado);
+            }
+
+            return ApplicationResult<ICollection<UsuarioResponseDTO>>
+               .Success(usuarios.Select(u => u.MapToResponseDTO()).ToList());                       
         }
 
         public async Task<ApplicationResult<int>> AdicionarAsync(UsuarioDTO usuarioDTO)
@@ -104,9 +112,7 @@ namespace Application.Services
                 return ApplicationResult<int>.Failure(ApplicationErrors.ErroInterno);
             }
         }
-
-
-        public async Task<LoginResponseDTO> FazerLoginAsync(LoginDTO loginDTO)
+        public async Task<ApplicationResult<LoginResponseDTO>> FazerLoginAsync(LoginDTO loginDTO)
         {
             var usuario = await _usuarioRepository.FazerLogin(new Usuario
             {
@@ -114,25 +120,21 @@ namespace Application.Services
                 Senha = loginDTO.Senha
             });
 
-            if (usuario != null)
+            if (usuario == null)
             {
-                string token = _tokenService.GerarToken(usuario);
-
-                return new LoginResponseDTO
-                {
-                    Id = usuario!.Id,
-                    Nome = usuario.Nome,
-                    Email = usuario.Email,
-                    Token = token
-                };
+                return ApplicationResult<LoginResponseDTO>
+                    .Failure(ApplicationErrors.CredenciaisInvalidas);
             }
 
-            return new LoginResponseDTO
-            {
-                Mensagem = HttpStatusCode.NotFound.ToString(),
-                Code = (int)HttpStatusCode.NotFound
-            };
+            var token = _tokenService.GerarToken(usuario);
 
+            return ApplicationResult<LoginResponseDTO>.Success(new LoginResponseDTO
+            {
+                Id = usuario.Id,
+                Nome = usuario.Nome,
+                Email = usuario.Email,
+                Token = token
+            });
         }
     }
 }
