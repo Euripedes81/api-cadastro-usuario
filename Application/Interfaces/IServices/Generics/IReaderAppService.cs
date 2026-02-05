@@ -1,5 +1,5 @@
-﻿using Application.DTO.Responses;
-using Application.Services;
+﻿using Application.Common;
+using Application.DTO.Responses;
 
 namespace Application.Interfaces.IServices.Generics
 {

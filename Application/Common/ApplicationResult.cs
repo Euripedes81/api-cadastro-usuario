@@ -1,4 +1,4 @@
-﻿namespace Application.Services
+﻿namespace Application.Common
 {
     public class ApplicationResult<T>
     {
