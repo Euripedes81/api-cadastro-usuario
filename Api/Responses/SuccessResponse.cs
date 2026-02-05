@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Application.Messages
+namespace Api.Responses
 {
     public class SuccessResponse<T>
     {

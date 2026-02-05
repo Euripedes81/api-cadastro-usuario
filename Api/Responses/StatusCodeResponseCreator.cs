@@ -1,4 +1,4 @@
-﻿namespace Application.Messages
+﻿namespace Api.Responses
 {
     public class StatusCodeResponseCreator
     {

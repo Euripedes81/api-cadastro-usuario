@@ -5,7 +5,6 @@ using Application.Interfaces.IServices;
 using Domain.Entities;
 using Application.Extensions;
 using System.Net;
-using Application.Messages;
 
 namespace Application.Services
 {
@@ -19,70 +18,57 @@ namespace Application.Services
             _usuarioRepository = usuarioRepository;
             _perfilUsuarioRepository = perfilUsuarioRepository;          
             _tokenService = tokenService;
-        }   
-    
-        public async Task<UsuarioResponseDTO?> ObterPorIdAsync(int id)
+        }
+
+        public async Task<ApplicationResult<UsuarioResponseDTO>> ObterPorIdAsync(int id)
         {
             var usuario = await _usuarioRepository.ObterPorIdAsync(id);
 
-            if(usuario == null)
+            if (usuario == null)
             {
-                return new UsuarioResponseDTO
-                {
-                    Code = (int)HttpStatusCode.NotFound,
-                    Mensagem = HttpStatusCode.NotFound.ToString()
-                };
+                return ApplicationResult<UsuarioResponseDTO>
+                    .Failure(ApplicationErrors.UsuarioNaoEncontrado);
             }
 
-            return usuario.MapToResponseDTO();
+            return ApplicationResult<UsuarioResponseDTO>
+                .Success(usuario.MapToResponseDTO());
         }
-
-        public async Task<GenericResponseDTO> AtualizarAsync(int id, UsuarioDTO usuarioDTO)
+        public async Task<ApplicationResult<int>> AtualizarAsync(int id, UsuarioDTO usuarioDTO)
         {
             var usuario = usuarioDTO.MapToEntity();
             usuario.Id = id;
 
             try
             {
-                if (!await _usuarioRepository.AtualizarAsync(usuario))
+                var atualizado = await _usuarioRepository.AtualizarAsync(usuario);
+
+                if (!atualizado)
                 {
-                    return new GenericResponseDTO
-                    {
-                        Code = (int)HttpStatusCode.NotFound,
-                        Mensagem = HttpStatusCode.NotFound.ToString()
-                    };
+                    return ApplicationResult<int>
+                        .Failure(ApplicationErrors.UsuarioNaoEncontrado);
                 }
 
+                // regra de negócio continua aqui
                 if (usuario.Id == 1)
                 {
                     usuario.PerfilUsuarioId = 1;
                     usuario.Inativo = false;
                 }
 
-                return new GenericResponseDTO
-                {
-                    Id = usuario!.Id
-                };
+                return ApplicationResult<int>.Success(usuario.Id);
             }
             catch (Exception ex)
             {
-                string mensagemException = HttpStatusCode.InternalServerError.ToString();
-                int code = (int)HttpStatusCode.InternalServerError;
-
-                if (ex.InnerException!.Message.ToString().Contains("IX_Usuario_Email"))
+                if (ex.InnerException?.Message.Contains("IX_Usuario_Email") == true)
                 {
-                    code = (int)HttpStatusCode.Conflict;
-                    mensagemException = $"{HttpStatusCode.Conflict}: {MessageResponse.EmailJaExiste}";
+                    return ApplicationResult<int>
+                        .Failure(ApplicationErrors.EmailJaExiste);
                 }
 
-                return new GenericResponseDTO
-                {
-                    Code = code,
-                    Mensagem = mensagemException
-                };
+                return ApplicationResult<int>
+                    .Failure(ApplicationErrors.ErroInterno);
             }
         }
-
         public async Task RemoverAsync(int id)
         {
             var usuario = _usuarioRepository.ObterPorIdAsync(id);
@@ -99,35 +85,26 @@ namespace Application.Services
             return usuarios.Select(u => u.MapToResponseDTO()).ToList();
         }
 
-        public async Task<GenericResponseDTO> AdicionarAsync(UsuarioDTO usuarioDTO)
+        public async Task<ApplicationResult<int>> AdicionarAsync(UsuarioDTO usuarioDTO)
         {
-            Usuario usuario = usuarioDTO.MapToEntity();
-
             try
             {
+                var usuario = usuarioDTO.MapToEntity();
                 await _usuarioRepository.AdicionarAsync(usuario);
-                var usuarioCriado = await _usuarioRepository.ObterPorIdAsync(usuario.Id);
 
-                return new GenericResponseDTO { Id = usuarioCriado!.Id };
+                return ApplicationResult<int>.Success(usuario.Id);
             }
             catch (Exception ex)
             {
-                string mensagemException = HttpStatusCode.InternalServerError.ToString();
-                int code = (int)HttpStatusCode.InternalServerError;
-
-                if (ex.InnerException!.Message.ToString().Contains("IX_Usuario_Email"))
+                if (ex.InnerException?.Message.Contains("IX_Usuario_Email") == true)
                 {
-                    code = (int)HttpStatusCode.Conflict;
-                    mensagemException = $"{HttpStatusCode.Conflict}: {MessageResponse.EmailJaExiste}";
+                    return ApplicationResult<int>.Failure(ApplicationErrors.EmailJaExiste);
                 }
 
-                return new GenericResponseDTO
-                {
-                    Code = code,
-                    Mensagem = mensagemException
-                };
+                return ApplicationResult<int>.Failure(ApplicationErrors.ErroInterno);
             }
         }
+
 
         public async Task<LoginResponseDTO> FazerLoginAsync(LoginDTO loginDTO)
         {

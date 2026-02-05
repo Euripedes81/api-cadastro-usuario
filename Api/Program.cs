@@ -1,5 +1,4 @@
-﻿using Application.Messages;
-using Application.Extensions;
+﻿using Application.Extensions;
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json;
+using Api.Responses;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,13 +52,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 context.Response.StatusCode = 401;
                 context.Response.ContentType = "application/json";
 
-                var result = JsonSerializer.Serialize(new ErrorResponse<StatusCodeResponse>(
-                    StatusCodeResponseCreator.Create(
-                        message: "Token inválido ou expirado.",
-                        code: StatusCodes.Status401Unauthorized
-                    ))
-                );
-
+                var result = JsonSerializer.Serialize(new ErrorResponse(message: "Token inválido ou expirado.", errorCode: "401"));
                 return context.Response.WriteAsync(result);
             }
         };
