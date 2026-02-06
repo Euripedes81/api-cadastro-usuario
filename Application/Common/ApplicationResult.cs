@@ -14,7 +14,7 @@
         }
 
         public static ApplicationResult<T> Success(T data)
-            => new(true, data, null);
+            => new(true, data, string.Empty);
 
         public static ApplicationResult<T> Failure(string errorCode)
             => new(false, default, errorCode);

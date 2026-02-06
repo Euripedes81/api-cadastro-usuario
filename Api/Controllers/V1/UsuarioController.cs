@@ -27,7 +27,7 @@ namespace Api.Controllers.V1
         /// <summary>
         /// Obtém um usuario.
         /// </summary>
-        /// <param name="id">E-mail do usuario</param> 
+        /// <param name="id">ID do usuario</param> 
         /// <response code="200">Ok</response> 
         /// <returns>Retorna um usuario.</returns>
         /// <remarks>Obtémum usuario.</remarks>
@@ -53,7 +53,7 @@ namespace Api.Controllers.V1
                         _ =>
                             StatusCode(
                                 StatusCodes.Status500InternalServerError,
-                                new ErrorResponse("Erro interno no servidor")
+                                new ErrorResponse(MessageResponse.ErroInternoServidor)
                             )
                     };
                 }
@@ -63,7 +63,7 @@ namespace Api.Controllers.V1
 
             return StatusCode(
                       StatusCodes.Status403Forbidden,
-                      new ErrorResponse("Acesso negado!", "403")
+                      new ErrorResponse(MessageResponse.AcessoNegado, StatusCodes.Status403Forbidden.ToString())
                  );
         }
 
@@ -97,7 +97,7 @@ namespace Api.Controllers.V1
                         _ =>
                             StatusCode(
                                 StatusCodes.Status500InternalServerError,
-                                new ErrorResponse("Erro interno no servidor")
+                                new ErrorResponse(MessageResponse.ErroInternoServidor)
                             )
                     };
                 }
@@ -135,9 +135,9 @@ namespace Api.Controllers.V1
                 ApplicationErrors.CredenciaisInvalidas =>
                     Unauthorized(new ProblemDetails
                     {
-                        Title = "Credenciais inválidas",
+                        Title = MessageResponse.CredenciaisInvalidas,
                         Status = StatusCodes.Status401Unauthorized,
-                        Detail = "E-mail ou senha incorretos."
+                        Detail = MessageResponse.EmailSenhaInvalidos
                     }),
 
                 _ =>
@@ -145,12 +145,11 @@ namespace Api.Controllers.V1
                         StatusCodes.Status500InternalServerError,
                         new ProblemDetails
                         {
-                            Title = "Erro interno",
+                            Title = MessageResponse.ErroInternoServidor,
                             Status = StatusCodes.Status500InternalServerError
                         })
             };          
         }
-
 
         /// <summary>
         /// Cria um usuário.
@@ -189,11 +188,10 @@ namespace Api.Controllers.V1
                 _ =>
                     StatusCode(
                         StatusCodes.Status500InternalServerError,
-                        new ErrorResponse("Erro interno no servidor")
+                        new ErrorResponse(MessageResponse.ErroInternoServidor)
                     )
             };
         }
-
 
         /// <summary>
         /// Atualiza um usuário.
@@ -236,11 +234,45 @@ namespace Api.Controllers.V1
                 _ =>
                     StatusCode(
                         StatusCodes.Status500InternalServerError,
-                        new ErrorResponse("Erro interno no servidor")
+                        new ErrorResponse(MessageResponse.ErroInternoServidor)
                     )
             };
-
         }
 
+        /// <summary>
+        /// Remove um usuário.
+        /// </summary>       
+        /// <param name="id"></param>      
+        /// <returns>Retorna no content.</returns>
+        /// <remarks>Remove um usuário.</remarks>          
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete([FromRoute] int id)
+        {
+            var result = await _usuarioService.RemoverAsync(id);
+
+            if (result.IsSuccess)
+            {
+                return NoContent();
+            }
+
+            return result.ErrorCode switch
+            {
+                ApplicationErrors.UsuarioNaoEncontrado =>
+                    NotFound(new ErrorResponse(
+                        MessageResponse.UsuarioNaoEncontrado,
+                        StatusCodes.Status404NotFound.ToString()
+                    )),           
+
+                _ =>
+                    StatusCode(
+                        StatusCodes.Status500InternalServerError,
+                        new ErrorResponse(MessageResponse.ErroInternoServidor)
+                    )
+            };           
+        }
     }
 }

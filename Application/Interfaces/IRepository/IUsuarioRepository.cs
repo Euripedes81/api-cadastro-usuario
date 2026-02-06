@@ -8,7 +8,7 @@ namespace Application.Interfaces.IRepository
         Task<ICollection<Usuario>> ObterTodosAsync();
         Task<Usuario?> ObterPorIdAsync(int id);
         Task<bool> AtualizarAsync(Usuario usuario);
-        Task RemoverAsync(int id);
+        Task RemoverAsync(Usuario usuario);
         Task AdicionarAsync(Usuario usuario);
     }
 }

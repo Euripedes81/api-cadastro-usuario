@@ -70,14 +70,25 @@ namespace Application.Services
                     .Failure(ApplicationErrors.ErroInterno);
             }
         }
-        public async Task RemoverAsync(int id)
+        public async Task<ApplicationResult<int>> RemoverAsync(int id)
         {
-            var usuario = _usuarioRepository.ObterPorIdAsync(id);
+            var usuario = await _usuarioRepository.ObterPorIdAsync(id);
+
+            if (usuario == null)
+            {
+                return ApplicationResult<int>
+                    .Failure(ApplicationErrors.UsuarioNaoEncontrado);
+            }
 
             if (usuario?.Id > 1)
             {
-                await _usuarioRepository.RemoverAsync(id);
+                await _usuarioRepository.RemoverAsync(usuario);
+                
+                return ApplicationResult<int>.Success(usuario.Id);
             }
+
+            return ApplicationResult<int>
+                   .Failure(ApplicationErrors.ErroInterno);
         }
 
         public async Task<ApplicationResult<ICollection<UsuarioResponseDTO>>> ObterTodosAsync()

@@ -5,7 +5,7 @@ using Application.Interfaces.IServices.Generics;
 
 namespace Application.Interfaces.IServices
 {
-    public interface IUsuarioAppService : IReaderAppService<UsuarioResponseDTO>, IDeleterAppService
+    public interface IUsuarioAppService : IReaderAppService<UsuarioResponseDTO>, IDeleterAppService<int>
     {
         Task<ApplicationResult<LoginResponseDTO>> FazerLoginAsync(LoginDTO loginDTO);
         Task<ApplicationResult<int>> AtualizarAsync(int id, UsuarioDTO usuarioDTO);

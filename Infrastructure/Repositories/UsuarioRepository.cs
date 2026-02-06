@@ -14,9 +14,8 @@ namespace Infrastructure.Repository
             _context = context;
         }
       
-        public async Task RemoverAsync(int id)
-        {
-            var usuario = _context.Usuarios.Find(id);
+        public async Task RemoverAsync(Usuario usuario)
+        {           
             _context.Remove(usuario!);
             await _context.SaveChangesAsync();
         }
@@ -51,9 +50,9 @@ namespace Infrastructure.Repository
             return false;
 
         }
-        public Task<Usuario?> FazerLogin(Usuario usuario)
+        public async Task<Usuario?> FazerLogin(Usuario usuario)
         {
-            return _context.Usuarios.FirstOrDefaultAsync(u => u.Email == usuario.Email && u.Senha == usuario.Senha);
+            return await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == usuario.Email && u.Senha == usuario.Senha);
         }
     }
 }

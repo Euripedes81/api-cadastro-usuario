@@ -1,7 +1,9 @@
-﻿namespace Application.Interfaces.IServices.Generics
+﻿using Application.Common;
+
+namespace Application.Interfaces.IServices.Generics
 {
-    public interface IDeleterAppService
+    public interface IDeleterAppService<T>
     {
-        Task RemoverAsync(int id);
+        Task<ApplicationResult<T>> RemoverAsync(int id);
     }
 }
