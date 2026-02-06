@@ -41,7 +41,7 @@ namespace Api.Controllers.V1
             {
                 return StatusCode(
                     StatusCodes.Status403Forbidden,
-                    new ErrorResponse(MessageResponse.AcessoNegado, StatusCodes.Status403Forbidden.ToString())
+                    new ErrorResponse(MessageResponse.NaoPermitido, StatusCodes.Status403Forbidden.ToString())
                );
             }
 
@@ -81,33 +81,29 @@ namespace Api.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]        
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get()
-        {
-          
+        {       
+            var result = await _usuarioService.ObterTodosAsync();
 
-                var result = await _usuarioService.ObterTodosAsync();
-
-                if (!result.IsSuccess)
+            if (!result.IsSuccess)
+            {
+                return result.ErrorCode switch
                 {
-                    return result.ErrorCode switch
-                    {
-                        ApplicationErrors.UsuarioNaoEncontrado =>
-                            NotFound(new ErrorResponse(
-                                MessageResponse.UsuarioNaoEncontrado,
-                                result.ErrorCode
-                            )),
+                    ApplicationErrors.UsuarioNaoEncontrado =>
+                        NotFound(new ErrorResponse(
+                            MessageResponse.UsuarioNaoEncontrado,
+                            result.ErrorCode
+                        )),
 
-                        _ =>
-                            StatusCode(
-                                StatusCodes.Status500InternalServerError,
-                                new ErrorResponse(MessageResponse.ErroInternoServidor)
-                            )
-                    };
-                }
+                    _ =>
+                        StatusCode(
+                            StatusCodes.Status500InternalServerError,
+                            new ErrorResponse(MessageResponse.ErroInternoServidor)
+                        )
+                };
+            }
 
-                return Ok(new SuccessResponseList<UsuarioResponseDTO>(result.Data!.ToList()));
-            
-
-          
+            return Ok(new SuccessResponseList<UsuarioResponseDTO>(result.Data!.ToList()));
+         
         }
 
         /// <summary>
@@ -267,8 +263,12 @@ namespace Api.Controllers.V1
                     NotFound(new ErrorResponse(
                         MessageResponse.UsuarioNaoEncontrado,
                         StatusCodes.Status404NotFound.ToString()
-                    )),           
-
+                    )),
+                ApplicationErrors.SemPermissao =>
+                    StatusCode(
+                         StatusCodes.Status403Forbidden,
+                        new ErrorResponse(MessageResponse.NaoPermitido, StatusCodes.Status403Forbidden.ToString())                     
+                    ),
                 _ =>
                     StatusCode(
                         StatusCodes.Status500InternalServerError,

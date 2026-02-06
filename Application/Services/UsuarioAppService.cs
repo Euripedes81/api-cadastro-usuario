@@ -80,23 +80,29 @@ namespace Application.Services
         }
         public async Task<ApplicationResult<int>> RemoverAsync(int id)
         {
-            var usuario = await _usuarioRepository.ObterPorIdAsync(id);
-
-            if (usuario == null)
+            try
             {
-                return ApplicationResult<int>
-                    .Failure(ApplicationErrors.UsuarioNaoEncontrado);
-            }
+                var usuario = await _usuarioRepository.ObterPorIdAsync(id);
 
-            if (usuario?.Id > 1)
+                if (usuario == null)
+                {
+                    return ApplicationResult<int>
+                        .Failure(ApplicationErrors.UsuarioNaoEncontrado);
+                }
+
+                if (usuario?.Id > 1)
+                {
+                    await _usuarioRepository.RemoverAsync(usuario);
+
+                    return ApplicationResult<int>.Success(usuario.Id);
+                }
+
+                return ApplicationResult<int>.Failure(ApplicationErrors.SemPermissao);
+            }
+            catch (Exception)
             {
-                await _usuarioRepository.RemoverAsync(usuario);
-                
-                return ApplicationResult<int>.Success(usuario.Id);
-            }
-
-            return ApplicationResult<int>
-                   .Failure(ApplicationErrors.ErroInterno);
+                return ApplicationResult<int>.Failure(ApplicationErrors.ErroInterno);
+            }            
         }
 
         public async Task<ApplicationResult<ICollection<UsuarioResponseDTO>>> ObterTodosAsync()
