@@ -264,7 +264,7 @@ namespace Api.Controllers.V1
                         MessageResponse.UsuarioNaoEncontrado,
                         StatusCodes.Status404NotFound.ToString()
                     )),
-                ApplicationErrors.SemPermissao =>
+                ApplicationErrors.AcessoNegado =>
                     StatusCode(
                          StatusCodes.Status403Forbidden,
                         new ErrorResponse(MessageResponse.NaoPermitido, StatusCodes.Status403Forbidden.ToString())                     

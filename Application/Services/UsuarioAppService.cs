@@ -90,14 +90,14 @@ namespace Application.Services
                         .Failure(ApplicationErrors.UsuarioNaoEncontrado);
                 }
 
-                if (usuario?.Id > 1)
+                if (usuario.Id > 1)
                 {
                     await _usuarioRepository.RemoverAsync(usuario);
 
                     return ApplicationResult<int>.Success(usuario.Id);
                 }
 
-                return ApplicationResult<int>.Failure(ApplicationErrors.SemPermissao);
+                return ApplicationResult<int>.Failure(ApplicationErrors.AcessoNegado);
             }
             catch (Exception)
             {
