@@ -23,16 +23,24 @@ namespace Application.Services
 
         public async Task<ApplicationResult<UsuarioResponseDTO>> ObterPorIdAsync(int id)
         {
-            var usuario = await _usuarioRepository.ObterPorIdAsync(id);
+            try
+            {
+                var usuario = await _usuarioRepository.ObterPorIdAsync(id);
 
-            if (usuario == null)
+                if (usuario == null)
+                {
+                    return ApplicationResult<UsuarioResponseDTO>
+                        .Failure(ApplicationErrors.UsuarioNaoEncontrado);
+                }
+
+                return ApplicationResult<UsuarioResponseDTO>
+                    .Success(usuario.MapToResponseDTO());
+            }
+            catch (Exception)
             {
                 return ApplicationResult<UsuarioResponseDTO>
-                    .Failure(ApplicationErrors.UsuarioNaoEncontrado);
+                    .Failure(ApplicationErrors.ErroInterno);
             }
-
-            return ApplicationResult<UsuarioResponseDTO>
-                .Success(usuario.MapToResponseDTO());
         }
         public async Task<ApplicationResult<int>> AtualizarAsync(int id, UsuarioDTO usuarioDTO)
         {

@@ -16,6 +16,7 @@ namespace Api.Controllers.V1
     [Produces("application/json")]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public class UsuarioController : ControllerBase
     {
         private readonly IUsuarioAppService _usuarioService;
@@ -36,35 +37,36 @@ namespace Api.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetId([FromRoute] int id)
         {
-            if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == id.ToString())
+            if (User.IsInRole("Usuario") && User.FindFirst(ClaimTypes.NameIdentifier)?.Value != id.ToString())
             {
-                var result = await _usuarioService.ObterPorIdAsync(id);
-
-                if (!result.IsSuccess)
-                {
-                    return result.ErrorCode switch
-                    {
-                        ApplicationErrors.UsuarioNaoEncontrado =>
-                            NotFound(new ErrorResponse(
-                                MessageResponse.UsuarioNaoEncontrado,
-                                result.ErrorCode
-                            )),
-
-                        _ =>
-                            StatusCode(
-                                StatusCodes.Status500InternalServerError,
-                                new ErrorResponse(MessageResponse.ErroInternoServidor)
-                            )
-                    };
-                }
-
-                return Ok(new SuccessResponse<UsuarioResponseDTO>(result.Data!));
+                return StatusCode(
+                    StatusCodes.Status403Forbidden,
+                    new ErrorResponse(MessageResponse.AcessoNegado, StatusCodes.Status403Forbidden.ToString())
+               );
             }
 
-            return StatusCode(
-                      StatusCodes.Status403Forbidden,
-                      new ErrorResponse(MessageResponse.AcessoNegado, StatusCodes.Status403Forbidden.ToString())
-                 );
+            var result = await _usuarioService.ObterPorIdAsync(id);
+
+            if (!result.IsSuccess)
+            {
+                return result.ErrorCode switch
+                {
+                    ApplicationErrors.UsuarioNaoEncontrado =>
+                        NotFound(new ErrorResponse(
+                            MessageResponse.UsuarioNaoEncontrado,
+                            StatusCodes.Status404NotFound.ToString()
+                        )),
+
+                    _ =>
+                        StatusCode(
+                            StatusCodes.Status500InternalServerError,
+                            new ErrorResponse(MessageResponse.ErroInternoServidor)
+                        )
+                };
+            }
+
+            return Ok(new SuccessResponse<UsuarioResponseDTO>(result.Data!));          
+         
         }
 
         /// <summary>
