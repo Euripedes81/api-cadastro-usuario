@@ -153,14 +153,14 @@ namespace Api.Controllers.V1
         /// Cria um usuário.
         /// </summary>        
         /// /// <param name="usuarioCreateDTO"></param>
-        /// <response code="200">Ok</response>
+        /// <response code="201">Created</response>
         /// <response code="401">Unauthorized</response>
         /// <returns>Cria um usuario.</returns>       
         [HttpPost]
         [Authorize(Roles = "Administrador")]
-        [ProducesResponseType(typeof(SuccessResponse<UsuarioResponseDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SuccessResponse<UsuarioResponseDTO>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(ErrorResponse  ), StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Post([FromBody] UsuarioDTO usuarioCreateDTO)
@@ -168,12 +168,12 @@ namespace Api.Controllers.V1
             var result = await _usuarioService.AdicionarAsync(usuarioCreateDTO);
          
             if (result.IsSuccess)
-            {
+            {               
                 return CreatedAtAction(
-                    nameof(GetId),
-                    new { id = result.Data },
-                    new { id = result.Data }
-                );
+                   nameof(GetId),
+                   new { id = result.Data },
+                   new SuccessResponse<GenericResponseDTO>(new GenericResponseDTO { Id = result.Data! })
+               );
             }
 
             return result.ErrorCode switch
