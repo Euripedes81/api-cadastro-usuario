@@ -56,8 +56,7 @@ namespace Application.Services
                     return ApplicationResult<int>
                         .Failure(ApplicationErrors.UsuarioNaoEncontrado);
                 }
-
-                // regra de negócio continua aqui
+               
                 if (usuario.Id == 1)
                 {
                     usuario.PerfilUsuarioId = 1;

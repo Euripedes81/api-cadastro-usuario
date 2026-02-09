@@ -1,6 +1,6 @@
 ﻿namespace Application.DTO.Responses
 {
-    public record UsuarioResponseDTO : ErrorMessageDTO
+    public record UsuarioResponseDTO
     {
         public int Id { get; set; }
         public string? Nome { get; set; }
