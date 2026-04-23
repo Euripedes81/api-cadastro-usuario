@@ -7,10 +7,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Interfaces\IRepository\IRepository.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 

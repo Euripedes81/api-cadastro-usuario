@@ -1,58 +1,26 @@
-using Application.Interfaces.IRepository;
+using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
+using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repository
 {
-    public class UsuarioRepository : IUsuarioRepository
-    {
-        private readonly UsuarioDbContext _context;
-
-        public UsuarioRepository(UsuarioDbContext context) 
+    public class UsuarioRepository : EfRepository<Usuario>, IUsuarioRepository
+    {      
+        public UsuarioRepository(UsuarioDbContext context)
+        : base(context)
         {
-            _context = context;
         }
-      
-        public async Task RemoverAsync(Usuario usuario)
-        {           
-            _context.Remove(usuario!);
-            await _context.SaveChangesAsync();
-        }
+        public async Task<Usuario?> FazerLogin(Usuario usuario)        
+            => await _dbSet.FirstOrDefaultAsync(u => u.Email == usuario.Email && u.Senha == usuario.Senha);
+        
 
-        public async Task<ICollection<Usuario>> ObterTodosAsync()
-        {
-            return await _context.Usuarios.Include(u => u.PerfilUsuario).ToListAsync();
-        }      
+        public override async Task<ICollection<Usuario>> ObterTodosAsync()       
+            => await _dbSet.Include(u => u.PerfilUsuario).ToListAsync();
 
-        public async Task AdicionarAsync(Usuario usuario)
-        {
-            _context.Add(usuario);
-           await _context.SaveChangesAsync();
-        }
-        public async Task<Usuario?> ObterPorIdAsync(int id)
-        {
-            return await _context.Usuarios.AsNoTracking().Include(u => u.PerfilUsuario).FirstOrDefaultAsync(u => u.Id == id);
-        }       
+        public override async Task<Usuario?> ObterPorIdAsync(int id)
+            => await _dbSet.Include(u => u.PerfilUsuario).FirstAsync(u => u.Id == id);
 
-        public async Task<bool> AtualizarAsync(Usuario usuario)
-        {
-            var usuarioExistente = await ObterPorIdAsync(usuario.Id);
-
-            if (usuarioExistente != null)
-            {
-                _context.Update(usuario);
-                await _context.SaveChangesAsync();
-
-                return true;
-            }
-
-            return false;
-
-        }
-        public async Task<Usuario?> FazerLogin(Usuario usuario)
-        {
-            return await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == usuario.Email && u.Senha == usuario.Senha);
-        }
     }
 }

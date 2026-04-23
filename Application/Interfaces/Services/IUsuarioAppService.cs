@@ -1,9 +1,9 @@
 ﻿using Application.Common;
 using Application.DTO.Create;
 using Application.DTO.Responses;
-using Application.Interfaces.IServices.Generics;
+using Application.Interfaces.Services.Generics;
 
-namespace Application.Interfaces.IServices
+namespace Application.Interfaces.Services
 {
     public interface IUsuarioAppService : IReaderAppService<UsuarioResponseDTO>, IDeleterAppService<int>
     {

@@ -2,7 +2,7 @@ using Api.Responses;
 using Application.Common;
 using Application.DTO.Create;
 using Application.DTO.Responses;
-using Application.Interfaces.IServices;
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -37,7 +37,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetId([FromRoute] int id)
         {
-            if (User.IsInRole("Usuario") && User.FindFirst(ClaimTypes.NameIdentifier)?.Value != id.ToString())
+            if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == id.ToString() || User.IsInRole("Administrador"))
             {
                 return StatusCode(
                     StatusCodes.Status403Forbidden,
@@ -81,7 +81,8 @@ namespace Api.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]        
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get()
-        {       
+        {         
+
             var result = await _usuarioService.ObterTodosAsync();
 
             if (!result.IsSuccess)
@@ -103,7 +104,6 @@ namespace Api.Controllers.V1
             }
 
             return Ok(new SuccessResponseList<UsuarioResponseDTO>(result.Data!.ToList()));
-         
         }
 
         /// <summary>

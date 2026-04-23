@@ -1,20 +1,19 @@
 ﻿using Application.DTO.Responses;
 using Application.DTO.Create;
-using Application.Interfaces.IRepository;
-using Application.Interfaces.IServices;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using Application.Extensions;
-using System.Net;
 using Application.Common;
 
 namespace Application.Services
 {
     public class UsuarioAppService : IUsuarioAppService
     {
-        private readonly IPerfilUsuarioRepository _perfilUsuarioRepository;
+        private readonly IGenericRepository<PerfilUsuario> _perfilUsuarioRepository;
         public readonly ITokenService _tokenService;
         public readonly IUsuarioRepository _usuarioRepository;
-        public UsuarioAppService(IUsuarioRepository usuarioRepository, IPerfilUsuarioRepository perfilUsuarioRepository, ITokenService tokenService)
+        public UsuarioAppService(IUsuarioRepository usuarioRepository, IGenericRepository<PerfilUsuario> perfilUsuarioRepository, ITokenService tokenService)
         {
             _usuarioRepository = usuarioRepository;
             _perfilUsuarioRepository = perfilUsuarioRepository;
@@ -49,14 +48,8 @@ namespace Application.Services
 
             try
             {
-                var atualizado = await _usuarioRepository.AtualizarAsync(usuario);
-
-                if (!atualizado)
-                {
-                    return ApplicationResult<int>
-                        .Failure(ApplicationErrors.UsuarioNaoEncontrado);
-                }
-               
+                await _usuarioRepository.AtualizarAsync(usuario);
+             
                 if (usuario.Id == 1)
                 {
                     usuario.PerfilUsuarioId = 1;
@@ -73,9 +66,17 @@ namespace Application.Services
                         .Failure(ApplicationErrors.EmailJaExiste);
                 }
 
+                if (ex.Message.Contains("affected 0 row") == true)
+                {
+                    return ApplicationResult<int>.Failure(ApplicationErrors.UsuarioNaoEncontrado);
+                }
+                
                 return ApplicationResult<int>
                     .Failure(ApplicationErrors.ErroInterno);
             }
+          
+            
+
         }
         public async Task<ApplicationResult<int>> RemoverAsync(int id)
         {
@@ -91,7 +92,7 @@ namespace Application.Services
 
                 if (usuario.Id > 1)
                 {
-                    await _usuarioRepository.RemoverAsync(usuario);
+                    await _usuarioRepository.RemoverAsync(id);
 
                     return ApplicationResult<int>.Success(usuario.Id);
                 }

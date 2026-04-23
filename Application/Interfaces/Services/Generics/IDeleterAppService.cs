@@ -1,6 +1,6 @@
-﻿using Application.Common;
+using Application.Common;
 
-namespace Application.Interfaces.IServices.Generics
+namespace Application.Interfaces.Services.Generics
 {
     public interface IDeleterAppService<T>
     {
