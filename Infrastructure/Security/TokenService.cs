@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.IServices;
+﻿using Application.Interfaces.Services;
 using Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;

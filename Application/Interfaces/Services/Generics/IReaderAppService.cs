@@ -1,7 +1,7 @@
 ﻿using Application.Common;
 using Application.DTO.Responses;
 
-namespace Application.Interfaces.IServices.Generics
+namespace Application.Interfaces.Services.Generics
 {
     public interface IReaderAppService<T> where T : class
     {

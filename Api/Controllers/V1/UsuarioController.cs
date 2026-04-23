@@ -2,7 +2,7 @@ using Api.Responses;
 using Application.Common;
 using Application.DTO.Create;
 using Application.DTO.Responses;
-using Application.Interfaces.IServices;
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -36,7 +36,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetId([FromRoute] int id)
         {
-            if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == id.ToString())
+            if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == id.ToString() || User.IsInRole("Administrador"))
             {
                 var result = await _usuarioService.ObterPorIdAsync(id);
 
@@ -79,33 +79,30 @@ namespace Api.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]        
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get()
-        {
-          
+        {         
 
-                var result = await _usuarioService.ObterTodosAsync();
+            var result = await _usuarioService.ObterTodosAsync();
 
-                if (!result.IsSuccess)
+            if (!result.IsSuccess)
+            {
+                return result.ErrorCode switch
                 {
-                    return result.ErrorCode switch
-                    {
-                        ApplicationErrors.UsuarioNaoEncontrado =>
-                            NotFound(new ErrorResponse(
-                                MessageResponse.UsuarioNaoEncontrado,
-                                result.ErrorCode
-                            )),
+                    ApplicationErrors.UsuarioNaoEncontrado =>
+                        NotFound(new ErrorResponse(
+                            MessageResponse.UsuarioNaoEncontrado,
+                            result.ErrorCode
+                        )),
 
-                        _ =>
-                            StatusCode(
-                                StatusCodes.Status500InternalServerError,
-                                new ErrorResponse("Erro interno no servidor")
-                            )
-                    };
-                }
+                    _ =>
+                        StatusCode(
+                            StatusCodes.Status500InternalServerError,
+                            new ErrorResponse("Erro interno no servidor")
+                        )
+                };
+            }
 
-                return Ok(new SuccessResponseList<UsuarioResponseDTO>(result.Data!.ToList()));
-            
-
-          
+            return Ok(new SuccessResponseList<UsuarioResponseDTO>(result.Data!.ToList()));
+                      
         }
 
         /// <summary>

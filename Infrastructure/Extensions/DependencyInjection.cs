@@ -1,5 +1,6 @@
-﻿using Application.Interfaces.IRepository;
-using Application.Interfaces.IServices;
+﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
+using Domain.Entities;
 using Infraestruture.Security;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
@@ -17,7 +18,7 @@ namespace Infrastructure.Extensions
             services.AddDbContext<UsuarioDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("Local")));
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-            services.AddScoped<IPerfilUsuarioRepository, PerfilUsuarioRepository>();         
+            services.AddScoped<IGenericRepository<PerfilUsuario>, PerfilUsuarioRepository>();         
             services.AddScoped<ITokenService, TokenService>();
 
             return services;

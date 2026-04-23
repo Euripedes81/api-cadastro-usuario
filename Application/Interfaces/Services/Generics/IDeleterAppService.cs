@@ -1,4 +1,4 @@
-﻿namespace Application.Interfaces.IServices.Generics
+﻿namespace Application.Interfaces.Services.Generics
 {
     public interface IDeleterAppService
     {
