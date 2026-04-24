@@ -39,34 +39,31 @@ namespace Api.Controllers.V1
         {
             if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == id.ToString() || User.IsInRole("Administrador"))
             {
-                return StatusCode(
-                    StatusCodes.Status403Forbidden,
-                    new ErrorResponse(MessageResponse.NaoPermitido, StatusCodes.Status403Forbidden.ToString())
-               );
-            }
+                var result = await _usuarioService.ObterPorIdAsync(id);
 
-            var result = await _usuarioService.ObterPorIdAsync(id);
-
-            if (!result.IsSuccess)
-            {
-                return result.ErrorCode switch
+                if (!result.IsSuccess)
                 {
-                    ApplicationErrors.UsuarioNaoEncontrado =>
-                        NotFound(new ErrorResponse(
-                            MessageResponse.UsuarioNaoEncontrado,
-                            StatusCodes.Status404NotFound.ToString()
-                        )),
+                    return result.ErrorCode switch
+                    {
+                        ApplicationErrors.UsuarioNaoEncontrado =>
+                            NotFound(new ErrorResponse(
+                                MessageResponse.UsuarioNaoEncontrado,
+                                result.ErrorCode
+                            )),
 
-                    _ =>
-                        StatusCode(
-                            StatusCodes.Status500InternalServerError,
-                            new ErrorResponse(MessageResponse.ErroInternoServidor)
-                        )
-                };
+                        _ =>
+                            StatusCode(
+                                StatusCodes.Status500InternalServerError,
+                                new ErrorResponse(MessageResponse.ErroInternoServidor)
+                            )
+                    };
+                }
+
+                return Ok(new SuccessResponse<UsuarioResponseDTO>(result.Data!));
             }
 
-            return Ok(new SuccessResponse<UsuarioResponseDTO>(result.Data!));          
-         
+            return StatusCode(StatusCodes.Status403Forbidden, new ErrorResponse(MessageResponse.NaoPermitido, StatusCodes.Status403Forbidden.ToString()));
+
         }
 
         /// <summary>
