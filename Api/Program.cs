@@ -34,8 +34,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(key),
             ClockSkew = TimeSpan.Zero
         };
-
-        //Documenta erro 401 token inválido ou expirado
+      
         options.Events = new JwtBearerEvents
         {
             OnAuthenticationFailed = context =>
@@ -53,6 +52,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 context.Response.ContentType = "application/json";
 
                 var result = JsonSerializer.Serialize(new ErrorResponse(message: "Token inválido ou expirado.", errorCode: "401"));
+                return context.Response.WriteAsync(result);
+            },
+            OnForbidden = context =>
+            {
+                context.Response.StatusCode = 403;
+                context.Response.ContentType = "application/json";
+
+                var result = JsonSerializer.Serialize(new ErrorResponse(message: "Acesso negado.", errorCode: "403"));
                 return context.Response.WriteAsync(result);
             }
         };
