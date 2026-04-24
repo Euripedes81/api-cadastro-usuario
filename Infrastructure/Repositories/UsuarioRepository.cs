@@ -20,7 +20,7 @@ namespace Infrastructure.Repository
             => await _dbSet.Include(u => u.PerfilUsuario).ToListAsync();
 
         public override async Task<Usuario?> ObterPorIdAsync(int id)
-            => await _dbSet.Include(u => u.PerfilUsuario).FirstAsync(u => u.Id == id);
+            => await _dbSet.Include(u => u.PerfilUsuario).FirstOrDefaultAsync(u => u.Id == id);
 
     }
 }
