@@ -13,14 +13,14 @@ namespace Infrastructure.Repository
         {
         }
         public async Task<Usuario?> FazerLogin(Usuario usuario)        
-            => await _dbSet.FirstOrDefaultAsync(u => u.Email == usuario.Email && u.Senha == usuario.Senha);
+            => await _dbSet.SingleOrDefaultAsync(u => u.Email == usuario.Email && u.Senha == usuario.Senha);
         
 
         public override async Task<ICollection<Usuario>> ObterTodosAsync()       
             => await _dbSet.Include(u => u.PerfilUsuario).ToListAsync();
 
         public override async Task<Usuario?> ObterPorIdAsync(int id)
-            => await _dbSet.Include(u => u.PerfilUsuario).FirstOrDefaultAsync(u => u.Id == id);
+            => await _dbSet.Include(u => u.PerfilUsuario).SingleOrDefaultAsync(u => u.Id == id);
 
     }
 }
