@@ -32,38 +32,33 @@ namespace Api.Controllers.V1
         /// <response code="200">Ok</response> 
         /// <returns>Retorna um usuario.</returns>
         /// <remarks>Obtémum usuario.</remarks>
-        [HttpGet("{id}")]       
+        [HttpGet("{id}")]
+        [Authorize(Policy = "OwnerOrAdmin")]
         [ProducesResponseType(typeof(SuccessResponse<UsuarioResponseDTO>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetId([FromRoute] int id)
-        {
-            if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == id.ToString() || User.IsInRole("Administrador"))
+        {           
+            var result = await _usuarioService.ObterPorIdAsync(id);
+
+            if (!result.IsSuccess)
             {
-                var result = await _usuarioService.ObterPorIdAsync(id);
-
-                if (!result.IsSuccess)
+                return result.ErrorCode switch
                 {
-                    return result.ErrorCode switch
-                    {
-                        ApplicationErrors.UsuarioNaoEncontrado =>
-                            NotFound(new ErrorResponse(
-                                MessageResponse.UsuarioNaoEncontrado,
-                                result.ErrorCode
-                            )),
+                    ApplicationErrors.UsuarioNaoEncontrado =>
+                        NotFound(new ErrorResponse(
+                            MessageResponse.UsuarioNaoEncontrado,
+                            result.ErrorCode
+                        )),
 
-                        _ =>
-                            StatusCode(
-                                StatusCodes.Status500InternalServerError,
-                                new ErrorResponse(MessageResponse.ErroInternoServidor)
-                            )
-                    };
-                }
-
-                return Ok(new SuccessResponse<UsuarioResponseDTO>(result.Data!));
+                    _ =>
+                        StatusCode(
+                            StatusCodes.Status500InternalServerError,
+                            new ErrorResponse(MessageResponse.ErroInternoServidor)
+                        )
+                };
             }
 
-            return StatusCode(StatusCodes.Status403Forbidden, new ErrorResponse(MessageResponse.NaoPermitido, StatusCodes.Status403Forbidden.ToString()));
-
+            return Ok(new SuccessResponse<UsuarioResponseDTO>(result.Data!));         
         }
 
         /// <summary>

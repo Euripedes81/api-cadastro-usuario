@@ -1,16 +1,18 @@
-﻿using Application.Extensions;
+﻿using Api.Responses;
+using Application.Extensions;
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using Api.Responses;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -79,7 +81,26 @@ builder.Services.AddControllers(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("OwnerOrAdmin", policy =>
+    policy.RequireAssertion(context =>
+    {
+        var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        var routeId = context.Resource switch
+        {
+            HttpContext httpContext =>
+                httpContext.GetRouteValue("id")?.ToString(),
+
+            AuthorizationFilterContext mvcContext =>
+                mvcContext.RouteData.Values["id"]?.ToString(),
+
+            _ => null
+        };
+
+        return userId == routeId || context.User.IsInRole("Administrador");
+    })
+);
 
 // Versionamento da API
 builder.Services.AddApiVersioning(options =>
