@@ -34,5 +34,23 @@ namespace Application.Extensions
                 Inativo = usuarioDTO.Inativo
             };
         }
+
+        public static PerfilUsuarioResponseDTO MapToResponseDTO(this PerfilUsuario perfilUsuario)
+        {
+            return new PerfilUsuarioResponseDTO
+            {
+                Id = perfilUsuario.Id,
+                Nome = perfilUsuario.Nome
+            };
+        }
+
+        public static PerfilUsuario MapToEntity(this PerfilUsuarioResponseDTO perfilUsuarioDTO)
+        {
+            return new PerfilUsuario
+            {
+                Id = perfilUsuarioDTO.Id,
+                Nome = perfilUsuarioDTO.Nome
+            };
+        }       
     }
 }

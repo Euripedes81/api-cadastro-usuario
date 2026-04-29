@@ -18,7 +18,7 @@ namespace Infrastructure.Extensions
             services.AddDbContext<UsuarioDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("Local")));
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-            services.AddScoped<IGenericRepository<PerfilUsuario>, PerfilUsuarioRepository>();         
+            services.AddScoped<IGenericRepository<PerfilUsuario>, EfRepository<PerfilUsuario>>();
             services.AddScoped<ITokenService, TokenService>();
 
             return services;
