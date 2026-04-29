@@ -9,14 +9,12 @@ using Application.Common;
 namespace Application.Services
 {
     public class UsuarioAppService : IUsuarioAppService
-    {
-        private readonly IGenericRepository<PerfilUsuario> _perfilUsuarioRepository;
+    {       
         public readonly ITokenService _tokenService;
         public readonly IUsuarioRepository _usuarioRepository;
-        public UsuarioAppService(IUsuarioRepository usuarioRepository, IGenericRepository<PerfilUsuario> perfilUsuarioRepository, ITokenService tokenService)
+        public UsuarioAppService(IUsuarioRepository usuarioRepository, ITokenService tokenService)
         {
-            _usuarioRepository = usuarioRepository;
-            _perfilUsuarioRepository = perfilUsuarioRepository;
+            _usuarioRepository = usuarioRepository;          
             _tokenService = tokenService;
         }
 
@@ -115,7 +113,7 @@ namespace Application.Services
             }
 
             return ApplicationResult<ICollection<UsuarioResponseDTO>>
-               .Success(usuarios.Select(u => u.MapToResponseDTO()).ToList());                       
+               .Success([.. usuarios.Select(u => u.MapToResponseDTO())]);                       
         }
 
         public async Task<ApplicationResult<int>> AdicionarAsync(UsuarioDTO usuarioDTO)
