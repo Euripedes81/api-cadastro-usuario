@@ -23,7 +23,7 @@ namespace Application.Services
                 if(perfilUsuario == null)
                 {
                     return ApplicationResult<PerfilUsuarioResponseDTO>
-                       .Failure(ApplicationErrors.PerfilUsuarioNaoEncontrado);
+                       .Failure(ApplicationErrors.NotFound);
                 }
 
                 return ApplicationResult<PerfilUsuarioResponseDTO>
@@ -33,7 +33,7 @@ namespace Application.Services
             {
 
                 return ApplicationResult<PerfilUsuarioResponseDTO>
-                   .Failure(ApplicationErrors.ErroInterno);
+                   .Failure(ApplicationErrors.InternalServerError);
             }
           
         }
@@ -45,7 +45,7 @@ namespace Application.Services
             if(perfisUsuarios == null)
             {
                 return ApplicationResult<ICollection<PerfilUsuarioResponseDTO>>
-                   .Failure(ApplicationErrors.PerfilUsuarioNaoEncontrado);
+                   .Failure(ApplicationErrors.NotFound);
             }
 
             return ApplicationResult<ICollection<PerfilUsuarioResponseDTO>>

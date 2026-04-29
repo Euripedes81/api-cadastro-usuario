@@ -4,9 +4,9 @@
     {
         public bool IsSuccess { get; }
         public T? Data { get; }
-        public string? ErrorCode { get; }
+        public int ErrorCode { get; }
 
-        private ApplicationResult(bool success, T? data, string? errorCode)
+        private ApplicationResult(bool success, T? data, int errorCode)
         {
             IsSuccess = success;
             Data = data;
@@ -14,9 +14,9 @@
         }
 
         public static ApplicationResult<T> Success(T data)
-            => new(true, data, string.Empty);
+            => new(true, data, default);
 
-        public static ApplicationResult<T> Failure(string errorCode)
+        public static ApplicationResult<T> Failure(int errorCode)
             => new(false, default, errorCode);
     }
 

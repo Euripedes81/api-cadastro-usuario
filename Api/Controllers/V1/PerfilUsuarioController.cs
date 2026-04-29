@@ -40,13 +40,14 @@ namespace Api.Controllers.V1
             var result = await _perfilUsuarioAppService.ObterPorIdAsync(id);
 
             if (!result.IsSuccess)
-            {
+            {              
+
                 return result.ErrorCode switch
                 {
-                    ApplicationErrors.PerfilUsuarioNaoEncontrado =>
+                    StatusCodes.Status404NotFound =>
                         NotFound(new ErrorResponse(
                             MessageResponse.PerfilUsuarioNaoEncontrado,
-                            result.ErrorCode
+                            result.ErrorCode.ToString()
                         )),
 
                     _ =>
@@ -80,10 +81,10 @@ namespace Api.Controllers.V1
             {
                 return result.ErrorCode switch
                 {
-                    ApplicationErrors.PerfilUsuarioNaoEncontrado =>
+                    StatusCodes.Status404NotFound =>
                         NotFound(new ErrorResponse(
                             MessageResponse.PerfilUsuarioNaoEncontrado,
-                            result.ErrorCode
+                            result.ErrorCode.ToString()
                         )),
 
                     _ =>

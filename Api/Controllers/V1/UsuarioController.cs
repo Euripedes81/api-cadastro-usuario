@@ -43,10 +43,10 @@ namespace Api.Controllers.V1
             {
                 return result.ErrorCode switch
                 {
-                    ApplicationErrors.UsuarioNaoEncontrado =>
+                    ApplicationErrors.NotFound =>
                         NotFound(new ErrorResponse(
                             MessageResponse.UsuarioNaoEncontrado,
-                            result.ErrorCode
+                            result.ErrorCode.ToString()
                         )),
 
                     _ =>
@@ -80,10 +80,10 @@ namespace Api.Controllers.V1
             {
                 return result.ErrorCode switch
                 {
-                    ApplicationErrors.UsuarioNaoEncontrado =>
+                    StatusCodes.Status404NotFound =>
                         NotFound(new ErrorResponse(
                             MessageResponse.UsuarioNaoEncontrado,
-                            result.ErrorCode
+                            result.ErrorCode.ToString()
                         )),
 
                     _ =>
@@ -121,7 +121,7 @@ namespace Api.Controllers.V1
            
             return result.ErrorCode switch
             {
-                ApplicationErrors.CredenciaisInvalidas =>
+                StatusCodes.Status401Unauthorized =>
                     Unauthorized(new ProblemDetails
                     {
                         Title = MessageResponse.CredenciaisInvalidas,
@@ -169,7 +169,7 @@ namespace Api.Controllers.V1
 
             return result.ErrorCode switch
             {
-                ApplicationErrors.EmailJaExiste =>
+                StatusCodes.Status409Conflict =>
                     Conflict(new ErrorResponse(
                         MessageResponse.EmailJaExiste
                     )),
@@ -208,16 +208,16 @@ namespace Api.Controllers.V1
 
             return result.ErrorCode switch
             {
-                ApplicationErrors.UsuarioNaoEncontrado =>
+                StatusCodes.Status404NotFound =>
                     NotFound(new ErrorResponse(
                         MessageResponse.UsuarioNaoEncontrado,
-                        result.ErrorCode
+                        result.ErrorCode.ToString()
                     )),
 
-                ApplicationErrors.EmailJaExiste =>
+                StatusCodes.Status409Conflict =>
                     Conflict(new ErrorResponse(
                         MessageResponse.EmailJaExiste,
-                        result.ErrorCode
+                        result.ErrorCode.ToString()
                     )),
 
                 _ =>
@@ -250,14 +250,14 @@ namespace Api.Controllers.V1
 
             return result.ErrorCode switch
             {
-                ApplicationErrors.UsuarioNaoEncontrado =>
+                StatusCodes.Status404NotFound =>
                     NotFound(new ErrorResponse(
                         MessageResponse.UsuarioNaoEncontrado,
                         StatusCodes.Status404NotFound.ToString()
                     )),
-                ApplicationErrors.AcessoNegado =>
+                StatusCodes.Status403Forbidden =>
                     StatusCode(
-                         StatusCodes.Status403Forbidden,
+                        StatusCodes.Status403Forbidden,
                         new ErrorResponse(MessageResponse.NaoPermitido, StatusCodes.Status403Forbidden.ToString())                     
                     ),
                 _ =>

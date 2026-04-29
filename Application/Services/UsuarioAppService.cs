@@ -27,7 +27,7 @@ namespace Application.Services
                 if (usuario == null)
                 {
                     return ApplicationResult<UsuarioResponseDTO>
-                        .Failure(ApplicationErrors.UsuarioNaoEncontrado);
+                        .Failure(ApplicationErrors.NotFound);
                 }
 
                 return ApplicationResult<UsuarioResponseDTO>
@@ -36,7 +36,7 @@ namespace Application.Services
             catch (Exception)
             {
                 return ApplicationResult<UsuarioResponseDTO>
-                    .Failure(ApplicationErrors.ErroInterno);
+                    .Failure(ApplicationErrors.InternalServerError);
             }
         }
         public async Task<ApplicationResult<int>> AtualizarAsync(int id, UsuarioDTO usuarioDTO)
@@ -45,14 +45,14 @@ namespace Application.Services
             usuario.Id = id;
 
             try
-            {
-                await _usuarioRepository.AtualizarAsync(usuario);
-             
+            {              
                 if (usuario.Id == 1)
                 {
                     usuario.PerfilUsuarioId = 1;
                     usuario.Inativo = false;
                 }
+
+                await _usuarioRepository.AtualizarAsync(usuario);
 
                 return ApplicationResult<int>.Success(usuario.Id);
             }
@@ -61,19 +61,17 @@ namespace Application.Services
                 if (ex.InnerException?.Message.Contains("IX_Usuario_Email") == true)
                 {
                     return ApplicationResult<int>
-                        .Failure(ApplicationErrors.EmailJaExiste);
+                        .Failure(ApplicationErrors.Conflict);
                 }
 
-                if (ex.Message.Contains("affected 0 row") == true)
+                if (ex.Message.Contains("affected 0 row"))
                 {
-                    return ApplicationResult<int>.Failure(ApplicationErrors.UsuarioNaoEncontrado);
+                    return ApplicationResult<int>.Failure(ApplicationErrors.NotFound);
                 }
                 
                 return ApplicationResult<int>
-                    .Failure(ApplicationErrors.ErroInterno);
-            }         
-         
-
+                    .Failure(ApplicationErrors.InternalServerError);
+            }       
         }
         public async Task<ApplicationResult<int>> RemoverAsync(int id)
         {
@@ -84,7 +82,7 @@ namespace Application.Services
                 if (usuario == null)
                 {
                     return ApplicationResult<int>
-                        .Failure(ApplicationErrors.UsuarioNaoEncontrado);
+                        .Failure(ApplicationErrors.NotFound);
                 }
 
                 if (usuario.Id > 1)
@@ -94,11 +92,11 @@ namespace Application.Services
                     return ApplicationResult<int>.Success(usuario.Id);
                 }
 
-                return ApplicationResult<int>.Failure(ApplicationErrors.AcessoNegado);
+                return ApplicationResult<int>.Failure(ApplicationErrors.Forbidden);
             }
             catch (Exception)
             {
-                return ApplicationResult<int>.Failure(ApplicationErrors.ErroInterno);
+                return ApplicationResult<int>.Failure(ApplicationErrors.InternalServerError);
             }            
         }
 
@@ -109,7 +107,7 @@ namespace Application.Services
             if (usuarios == null)
             {
                 return ApplicationResult<ICollection<UsuarioResponseDTO>>
-                    .Failure(ApplicationErrors.UsuarioNaoEncontrado);
+                    .Failure(ApplicationErrors.NotFound);
             }
 
             return ApplicationResult<ICollection<UsuarioResponseDTO>>
@@ -129,10 +127,10 @@ namespace Application.Services
             {
                 if (ex.InnerException?.Message.Contains("IX_Usuario_Email") == true)
                 {
-                    return ApplicationResult<int>.Failure(ApplicationErrors.EmailJaExiste);
+                    return ApplicationResult<int>.Failure(ApplicationErrors.Conflict);
                 }
 
-                return ApplicationResult<int>.Failure(ApplicationErrors.ErroInterno);
+                return ApplicationResult<int>.Failure(ApplicationErrors.InternalServerError);
             }
         }
         public async Task<ApplicationResult<LoginResponseDTO>> FazerLoginAsync(LoginDTO loginDTO)
@@ -146,7 +144,7 @@ namespace Application.Services
             if (usuario == null)
             {
                 return ApplicationResult<LoginResponseDTO>
-                    .Failure(ApplicationErrors.CredenciaisInvalidas);
+                    .Failure(ApplicationErrors.Unauthorized);
             }
 
             var token = _tokenService.GerarToken(usuario);

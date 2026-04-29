@@ -2,11 +2,11 @@
 {
     public static class ApplicationErrors
     {
-        public const string UsuarioNaoEncontrado = "USUARIO_NAO_ENCONTRADO";
-        public const string PerfilUsuarioNaoEncontrado = "PERFIL_USUARIO_NAO_ENCONTRADO";
-        public const string EmailJaExiste = "EMAIL_JA_EXISTE";
-        public const string ErroInterno = "ERRO_INTERNO";
-        public const string CredenciaisInvalidas = "CREDENCIAIS_INVALIDAS";
-        public const string AcessoNegado = "ACESSO_NEGADO";
+        public const int Ok = 200;
+        public const int Unauthorized = 401;
+        public const int Forbidden = 403;
+        public const int NotFound = 404;       
+        public const int Conflict = 409;
+        public const int InternalServerError = 500;      
     }
 }
