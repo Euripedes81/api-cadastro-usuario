@@ -43,9 +43,9 @@ namespace Api.Controllers.V1
             {
                 return result.ErrorCode switch
                 {
-                    ApplicationErrors.UsuarioNaoEncontrado =>
+                    ApplicationErrors.PerfilUsuarioNaoEncontrado =>
                         NotFound(new ErrorResponse(
-                            MessageResponse.UsuarioNaoEncontrado,
+                            MessageResponse.PerfilUsuarioNaoEncontrado,
                             result.ErrorCode
                         )),
 
@@ -80,9 +80,9 @@ namespace Api.Controllers.V1
             {
                 return result.ErrorCode switch
                 {
-                    ApplicationErrors.UsuarioNaoEncontrado =>
+                    ApplicationErrors.PerfilUsuarioNaoEncontrado =>
                         NotFound(new ErrorResponse(
-                            MessageResponse.UsuarioNaoEncontrado,
+                            MessageResponse.PerfilUsuarioNaoEncontrado,
                             result.ErrorCode
                         )),
 
@@ -94,7 +94,7 @@ namespace Api.Controllers.V1
                 };
             }
 
-            return Ok(new SuccessResponseList<PerfilUsuarioResponseDTO>(result.Data!.ToList()));
+            return Ok(new SuccessResponseList<PerfilUsuarioResponseDTO>([.. result.Data!]));
         }
     }
 }
