@@ -8,11 +8,5 @@
         public bool Inativo { get; set; }
         public PerfilUsuarioResponseDTO? Perfil { get; set; }
 
-    }
-
-    public class PerfilUsuarioResponseDTO
-    {
-        public int Id { get; set; }
-        public string? Nome { get; set; }
-    }
+    }   
 }
