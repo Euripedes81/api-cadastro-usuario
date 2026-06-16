@@ -12,10 +12,12 @@ namespace Application.Services
     {       
         public readonly ITokenService _tokenService;
         public readonly IUsuarioRepository _usuarioRepository;
-        public UsuarioAppService(IUsuarioRepository usuarioRepository, ITokenService tokenService)
+        private readonly IPasswordHasherService _passwordHasher;
+        public UsuarioAppService(IUsuarioRepository usuarioRepository, ITokenService tokenService, IPasswordHasherService passwordHasher)
         {
             _usuarioRepository = usuarioRepository;          
             _tokenService = tokenService;
+            _passwordHasher = passwordHasher;
         }
 
         public async Task<ApplicationResult<UsuarioResponseDTO>> ObterPorIdAsync(int id)
@@ -43,6 +45,7 @@ namespace Application.Services
         {
             var usuario = usuarioDTO.MapToEntity();
             usuario.Id = id;
+            usuario.Senha = _passwordHasher.HashPassword(usuarioDTO.Senha!);
 
             try
             {              
@@ -118,7 +121,9 @@ namespace Application.Services
         {
             try
             {
-                var usuario = usuarioDTO.MapToEntity();
+                var usuario = usuarioDTO.MapToEntity();               
+                usuario.Senha = _passwordHasher.HashPassword(usuarioDTO.Senha!);
+
                 await _usuarioRepository.AdicionarAsync(usuario);
 
                 return ApplicationResult<int>.Success(usuario.Id);
@@ -137,11 +142,16 @@ namespace Application.Services
         {
             var usuario = await _usuarioRepository.FazerLogin(new Usuario
             {
-                Email = loginDTO.Email,
-                Senha = loginDTO.Senha
+                Email = loginDTO.Email
             });
 
             if (usuario == null)
+            {
+                return ApplicationResult<LoginResponseDTO>
+                    .Failure(ApplicationErrors.Unauthorized);
+            }
+
+            if (!_passwordHasher.VerifyPassword(usuario.Senha!, loginDTO.Senha!))
             {
                 return ApplicationResult<LoginResponseDTO>
                     .Failure(ApplicationErrors.Unauthorized);

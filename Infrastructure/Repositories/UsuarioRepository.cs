@@ -13,7 +13,7 @@ namespace Infrastructure.Repository
         {
         }
         public async Task<Usuario?> FazerLogin(Usuario usuario)        
-            => await _dbSet.SingleOrDefaultAsync(u => u.Email == usuario.Email && u.Senha == usuario.Senha);
+            => await _dbSet.SingleOrDefaultAsync(u => u.Email == usuario.Email);
         
 
         public override async Task<ICollection<Usuario>> ObterTodosAsync()       

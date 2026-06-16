@@ -15,7 +15,7 @@ namespace Domain.Entities
         public string? Email { get; set; }
 
         [Required]
-        [MaxLength(20)]
+        [MaxLength(256)]
         public string? Senha { get; set; }      
         public bool Inativo { get; set; }   
         [Required]

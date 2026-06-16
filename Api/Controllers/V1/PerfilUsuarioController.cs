@@ -1,5 +1,4 @@
 ﻿using Api.Responses;
-using Application.Common;
 using Application.DTO.Responses;
 using Application.Interfaces.Services.Generics;
 using Microsoft.AspNetCore.Authorization;

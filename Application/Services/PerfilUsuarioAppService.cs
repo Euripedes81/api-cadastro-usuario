@@ -34,8 +34,7 @@ namespace Application.Services
 
                 return ApplicationResult<PerfilUsuarioResponseDTO>
                    .Failure(ApplicationErrors.InternalServerError);
-            }
-          
+            }          
         }
 
         public async Task<ApplicationResult<ICollection<PerfilUsuarioResponseDTO>>> ObterTodosAsync()

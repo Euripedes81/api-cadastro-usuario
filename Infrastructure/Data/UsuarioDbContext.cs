@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
@@ -31,9 +32,11 @@ namespace Infrastructure.Data
                 new PerfilUsuario { Id = 2, Nome = "Usuário" }
                 );
 
-            modelBuilder.Entity<Usuario>().HasData(
-                new Usuario { Id = 1, Nome = "Administrador", Email = "admin@cadastro.com.br", Senha = "Admin07!Cadastro#", PerfilUsuarioId = 1, Inativo = false }
-                );
+            var hash = new PasswordHasher<Usuario>();
+            var usuario = new Usuario { Id = 1, Nome = "Administrador", Email = "admin@cadastro.com.br", Senha = "Admin07!Cadastro#", PerfilUsuarioId = 1, Inativo = false };
+            usuario.Senha = hash.HashPassword(usuario, usuario.Senha);
+
+            modelBuilder.Entity<Usuario>().HasData(usuario);
         }
     }
 }
