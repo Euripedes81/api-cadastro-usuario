@@ -50,6 +50,33 @@ namespace Application.UnitTests.Services
         }
 
         [Fact]
+        public async Task ObterPorIdAsync_QuandoUsuarioExiste_DeveRetornarDto()
+        {
+            // Arrange
+
+            var usuario = new Usuario
+            {
+                Id = 1,
+                Nome = "João",
+                Email = "joao@email.com",
+                Senha = "HASH",
+                PerfilUsuario = new PerfilUsuario { Id = 2, Nome = "Usuário" }
+            };
+
+            _usuarioRepositoryMock.Setup(x => x.ObterPorIdAsync(1)).ReturnsAsync(usuario);
+
+            // Act
+
+            var result = await _service.ObterPorIdAsync(1);
+
+            // Assert
+
+            result.IsSuccess.Should().BeTrue();
+
+            result.Data.Should().NotBeNull();
+        }
+
+        [Fact]
         public async Task AtualizarAsync_QuandoDadosValidos_DeveRetornarSucesso()
         {
             // Arrange
@@ -73,6 +100,38 @@ namespace Application.UnitTests.Services
             result.IsSuccess.Should().BeTrue();
 
             _usuarioRepositoryMock.Verify(x => x.AtualizarAsync(It.Is<Usuario>(u => u.Id == 2 && u.Senha == "HASH")), Times.Once);
+        }
+
+        [Fact]
+        public async Task FazerLoginAsync_QuandoCredenciaisValidas_DeveRetornarToken()
+        {
+            // Arrange
+            var usuario = new Usuario
+            {
+                Id = 1,
+                Nome = "Administrador",
+                Email = "admin@email.com",
+                Senha = "HASH"
+            };
+
+            _usuarioRepositoryMock.Setup(x => x.FazerLogin(It.IsAny<Usuario>())).ReturnsAsync(usuario);
+
+            _passwordHasherMock.Setup(x => x.VerifyPassword("HASH", "123456")).Returns(true);
+
+            _tokenServiceMock.Setup(x => x.GerarToken(usuario)).Returns("TOKEN123");
+
+            // Act
+            var result = await _service.FazerLoginAsync(
+                new LoginDTO
+                {
+                    Email = "admin@email.com",
+                    Senha = "123456"
+                });
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+          
+            result.Data!.Token.Should().Be("TOKEN123");           
         }
     }
 }
