@@ -131,7 +131,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         c.AddServer(new OpenApiServer
         {
-            Url = "https://cadastrousuarios.com.br/Api",
+            Url = "https://cadastro-usuario.azurewebsites.net/",
             Description = "Cadastro de Usuários"
         });
     }
@@ -187,8 +187,8 @@ var app = builder.Build();
 var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
@@ -198,7 +198,7 @@ if (app.Environment.IsDevelopment())
             options.RoutePrefix = "swagger";
         }
     });
-}
+//}
 
 app.UseHttpsRedirection();
 
